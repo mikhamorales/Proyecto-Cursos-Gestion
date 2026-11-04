@@ -78,12 +78,25 @@
       <messageEventDefinition></messageEventDefinition>
     </startEvent>
     <exclusiveGateway id="sid-4D7FB2AD-D7FA-44D6-B00A-200FCF1B7461" name="Es viable"></exclusiveGateway>
+<<<<<<< HEAD:proyecto/src/main/resources/Institucion_de_capacitacion.bpmn20.xml
     <endEvent id="sid-3EBB93AC-2D16-40C1-88C9-BB8058BDD3E9">
       <extensionElements>
         <flowable:executionListener event="start" expression="${execution.setVariable('resultado', 'NO_VIABLE')}"></flowable:executionListener>
       </extensionElements>
     </endEvent>
     <userTask id="sid-4743C649-78C8-4B6D-8CC4-D51704E7AEFE" name="Registrar y elaborar propuesta" flowable:formFieldValidation="true"></userTask>
+=======
+    <endEvent id="sid-3EBB93AC-2D16-40C1-88C9-BB8058BDD3E9"></endEvent>
+    <userTask id="sid-4743C649-78C8-4B6D-8CC4-D51704E7AEFE" name="Registrar y elaborar propuesta" flowable:assignee="jefeAdmin" flowable:formFieldValidation="true">
+      <extensionElements>
+        <modeler:activiti-idm-assignee xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-assignee>
+        <modeler:assignee-info-email xmlns:modeler="http://flowable.org/modeler"><![CDATA[jefeAdmin@gmail.com]]></modeler:assignee-info-email>
+        <modeler:assignee-info-firstname xmlns:modeler="http://flowable.org/modeler"><![CDATA[Pablo]]></modeler:assignee-info-firstname>
+        <modeler:assignee-info-lastname xmlns:modeler="http://flowable.org/modeler"><![CDATA[Lopez]]></modeler:assignee-info-lastname>
+        <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+      </extensionElements>
+    </userTask>
+>>>>>>> 25176e2cdf69396518fd673f0ebc1caa22367d80:proyecto/src/main/resources/OrganizacionCursosv2.bpmn20.xml
     <businessRuleTask id="sid-5F142037-A40B-4861-971A-EC57BE2BEC21" name="Evaluar viabilidad"></businessRuleTask>
     <scriptTask id="sid-276FCE33-636C-4E20-A8D9-F0331A07AEDC" name="Notificar decision" flowable:autoStoreVariables="false"></scriptTask>
     <scriptTask id="sid-F22C6E3A-30FC-496B-8211-750E0AE12F09" name="Enviar propuesta" flowable:autoStoreVariables="false"></scriptTask>
@@ -91,13 +104,29 @@
     <intermediateCatchEvent id="sid-F2B41003-3CCA-4068-A361-1F093367FEDC" name="Modificaciones">
       <messageEventDefinition></messageEventDefinition>
     </intermediateCatchEvent>
-    <userTask id="sid-84A2E6BE-F9B1-414B-A40C-F347E750CDCB" name="Revisar propuesta" flowable:formFieldValidation="true"></userTask>
+    <userTask id="sid-84A2E6BE-F9B1-414B-A40C-F347E750CDCB" name="Revisar propuesta" flowable:assignee="jefeAdmin" flowable:formFieldValidation="true">
+      <extensionElements>
+        <modeler:activiti-idm-assignee xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-assignee>
+        <modeler:assignee-info-email xmlns:modeler="http://flowable.org/modeler"><![CDATA[jefeAdmin@gmail.com]]></modeler:assignee-info-email>
+        <modeler:assignee-info-firstname xmlns:modeler="http://flowable.org/modeler"><![CDATA[Pablo]]></modeler:assignee-info-firstname>
+        <modeler:assignee-info-lastname xmlns:modeler="http://flowable.org/modeler"><![CDATA[Lopez]]></modeler:assignee-info-lastname>
+        <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+      </extensionElements>
+    </userTask>
     <intermediateCatchEvent id="sid-3091E597-A26E-4B24-8588-0A7DADA09C34" name="5 dias">
       <timerEventDefinition></timerEventDefinition>
     </intermediateCatchEvent>
     <exclusiveGateway id="sid-9BA9209A-DF82-42F9-B3D9-75D55783CDCA" name="Se enviaron 2 notificaciones"></exclusiveGateway>
     <scriptTask id="sid-C3EA7F9D-32C3-4005-8B6C-8B0DB1734169" name="Enviar recordatorio" flowable:autoStoreVariables="false"></scriptTask>
-    <userTask id="sid-DAB336A9-0845-4786-96BD-E5C4BBBA0BA2" name="Archivar solicitud" flowable:formFieldValidation="true"></userTask>
+    <userTask id="sid-DAB336A9-0845-4786-96BD-E5C4BBBA0BA2" name="Archivar solicitud" flowable:assignee="jefeAdmin" flowable:formFieldValidation="true">
+      <extensionElements>
+        <modeler:activiti-idm-assignee xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-assignee>
+        <modeler:assignee-info-email xmlns:modeler="http://flowable.org/modeler"><![CDATA[jefeAdmin@gmail.com]]></modeler:assignee-info-email>
+        <modeler:assignee-info-firstname xmlns:modeler="http://flowable.org/modeler"><![CDATA[Pablo]]></modeler:assignee-info-firstname>
+        <modeler:assignee-info-lastname xmlns:modeler="http://flowable.org/modeler"><![CDATA[Lopez]]></modeler:assignee-info-lastname>
+        <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+      </extensionElements>
+    </userTask>
     <endEvent id="sid-A35BEC0D-8AF4-48B2-A423-0EB31BAD527E" name="Solicitud cerrada"></endEvent>
     <intermediateCatchEvent id="sid-1541C656-84C2-4ADB-9565-07395046E55B" name="Rechazo">
       <extensionElements>
@@ -113,26 +142,62 @@
       <startEvent id="sid-BB643321-41FF-487A-AAE1-1E7D1C3D2B91" flowable:formFieldValidation="true"></startEvent>
       <parallelGateway id="sid-FA59CF98-BCF7-4569-A745-EB39F0C2C26B" name="Preparacion en paralelo"></parallelGateway>
       <receiveTask id="sid-982375C3-4EF8-435A-A291-BF9A1933A05C" name="Recibir nomina"></receiveTask>
-      <userTask id="sid-6443AE13-2ACF-4CC6-AE8A-F6ADACC2DFC4" name="Confeccionar lista definitiva" flowable:formFieldValidation="true"></userTask>
-      <userTask id="sid-E0F8C31B-8D21-4CBC-A2A7-C7213EA7FBFB" name="Preparar materiales" flowable:formFieldValidation="true"></userTask>
+      <userTask id="sid-6443AE13-2ACF-4CC6-AE8A-F6ADACC2DFC4" name="Confeccionar lista definitiva" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+        <extensionElements>
+          <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
+          <modeler:activiti-idm-candidate-group xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-candidate-group>
+          <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+        </extensionElements>
+      </userTask>
+      <userTask id="sid-E0F8C31B-8D21-4CBC-A2A7-C7213EA7FBFB" name="Preparar materiales" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+        <extensionElements>
+          <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
+          <modeler:activiti-idm-candidate-group xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-candidate-group>
+          <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+        </extensionElements>
+      </userTask>
       <parallelGateway id="sid-CF1955EC-B385-48C5-8E83-88EA58EEC24E" name="Preparacion completa"></parallelGateway>
-      <userTask id="sid-FC42B03B-500A-4344-A46D-C18448C77F0D" name="Evaluar recursos" flowable:formFieldValidation="true"></userTask>
+      <userTask id="sid-FC42B03B-500A-4344-A46D-C18448C77F0D" name="Evaluar recursos" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+        <extensionElements>
+          <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
+          <modeler:activiti-idm-candidate-group xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-candidate-group>
+          <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+        </extensionElements>
+      </userTask>
       <inclusiveGateway id="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846"></inclusiveGateway>
       <serviceTask id="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D" name="Reservar aula"></serviceTask>
       <boundaryEvent id="sid-8809100B-A6B1-4472-A02F-8273B4CD527A" attachedToRef="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D" cancelActivity="false">
         <compensateEventDefinition></compensateEventDefinition>
       </boundaryEvent>
       <serviceTask id="sid-C5D62DD3-223B-479A-9F46-D3BCD2AC2E90" name="Liberar aula"></serviceTask>
-      <userTask id="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" name="Solicitar aula virtual" flowable:formFieldValidation="true"></userTask>
+      <userTask id="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" name="Solicitar aula virtual" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+        <extensionElements>
+          <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
+          <modeler:activiti-idm-candidate-group xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-candidate-group>
+          <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+        </extensionElements>
+      </userTask>
       <boundaryEvent id="sid-C925B450-2C19-455D-AB88-8A1337014BFE" attachedToRef="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" cancelActivity="false">
         <compensateEventDefinition></compensateEventDefinition>
       </boundaryEvent>
       <serviceTask id="sid-CA860AD7-83F9-4734-A709-41F01D88805C" name="Liberar aula virtual"></serviceTask>
-      <userTask id="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" name="Contratar equipamiento" flowable:formFieldValidation="true"></userTask>
+      <userTask id="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" name="Contratar equipamiento" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+        <extensionElements>
+          <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
+          <modeler:activiti-idm-candidate-group xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-candidate-group>
+          <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+        </extensionElements>
+      </userTask>
       <boundaryEvent id="sid-A5E9DA16-D099-439B-B683-ED017EACD460" attachedToRef="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" cancelActivity="false">
         <compensateEventDefinition></compensateEventDefinition>
       </boundaryEvent>
-      <userTask id="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8" name="Liberar equipamiento" flowable:formFieldValidation="true"></userTask>
+      <userTask id="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8" name="Liberar equipamiento" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+        <extensionElements>
+          <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
+          <modeler:activiti-idm-candidate-group xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-candidate-group>
+          <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+        </extensionElements>
+      </userTask>
       <inclusiveGateway id="sid-E3A32C56-8536-4526-A638-448A00454329"></inclusiveGateway>
       <endEvent id="sid-580555E0-7EE2-4816-AC85-43385A15AB16"></endEvent>
       <subProcess id="sid-4FB5F0E1-8B49-4A9B-A61F-F88998976055" name="subProcess" triggeredByEvent="true">
@@ -178,21 +243,56 @@
       </extensionElements>
     </endEvent>
     <scriptTask id="sid-00F6EDFA-A7D3-499A-8684-609F8DB1A941" name="Enviar confirmacion" flowable:autoStoreVariables="false"></scriptTask>
-    <userTask id="sid-B6D61931-87C0-4758-AAA9-6546C5AF7F92" name="Enviar informe a la empresa y archivar expediente" flowable:formFieldValidation="true"></userTask>
+    <userTask id="sid-B6D61931-87C0-4758-AAA9-6546C5AF7F92" name="Enviar informe a la empresa y archivar expediente" flowable:assignee="jefeAdmin" flowable:formFieldValidation="true">
+      <extensionElements>
+        <modeler:activiti-idm-assignee xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-assignee>
+        <modeler:assignee-info-email xmlns:modeler="http://flowable.org/modeler"><![CDATA[jefeAdmin@gmail.com]]></modeler:assignee-info-email>
+        <modeler:assignee-info-firstname xmlns:modeler="http://flowable.org/modeler"><![CDATA[Pablo]]></modeler:assignee-info-firstname>
+        <modeler:assignee-info-lastname xmlns:modeler="http://flowable.org/modeler"><![CDATA[Lopez]]></modeler:assignee-info-lastname>
+        <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+      </extensionElements>
+    </userTask>
     <intermediateThrowEvent id="sid-D30AE875-ACB8-4573-8F40-AD3342C513A4" name="Liberar recursos">
       <compensateEventDefinition></compensateEventDefinition>
     </intermediateThrowEvent>
+<<<<<<< HEAD:proyecto/src/main/resources/Institucion_de_capacitacion.bpmn20.xml
     <endEvent id="sid-392CF0AC-4B00-42BA-ABF2-4316FA1354D6" name="Curso finalizado">
       <extensionElements>
         <flowable:executionListener event="start" expression="${execution.setVariable('resultado', 'FINALIZADO')}"></flowable:executionListener>
       </extensionElements>
     </endEvent>
     <userTask id="sid-D9626FE6-AE69-44AF-9389-E320BC348EDB" name="Definir docente que desarrola el curso" flowable:formFieldValidation="true"></userTask>
+=======
+    <endEvent id="sid-392CF0AC-4B00-42BA-ABF2-4316FA1354D6" name="Curso finalizado"></endEvent>
+    <userTask id="sid-D9626FE6-AE69-44AF-9389-E320BC348EDB" name="Definir docente que desarrola el curso" flowable:assignee="jefeDocente" flowable:formFieldValidation="true">
+      <extensionElements>
+        <modeler:activiti-idm-assignee xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-assignee>
+        <modeler:assignee-info-email xmlns:modeler="http://flowable.org/modeler"><![CDATA[jefeDocente@gmail.com]]></modeler:assignee-info-email>
+        <modeler:assignee-info-firstname xmlns:modeler="http://flowable.org/modeler"><![CDATA[David]]></modeler:assignee-info-firstname>
+        <modeler:assignee-info-lastname xmlns:modeler="http://flowable.org/modeler"><![CDATA[Luna]]></modeler:assignee-info-lastname>
+        <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+      </extensionElements>
+    </userTask>
+>>>>>>> 25176e2cdf69396518fd673f0ebc1caa22367d80:proyecto/src/main/resources/OrganizacionCursosv2.bpmn20.xml
     <intermediateCatchEvent id="sid-0E1EA514-6D29-40B5-BFF9-3CF74DF444AD" name="Fecha programada">
       <timerEventDefinition></timerEventDefinition>
     </intermediateCatchEvent>
-    <userTask id="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2" name="Desarrollar curso" flowable:formFieldValidation="true"></userTask>
-    <userTask id="sid-EDDAC05F-B007-4E01-8223-713A621E1188" name="Elaborar informe de resultados" flowable:formFieldValidation="true"></userTask>
+    <userTask id="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2" name="Desarrollar curso" flowable:candidateGroups="docentes" flowable:formFieldValidation="true">
+      <extensionElements>
+        <modeler:group-info-name-docentes xmlns:modeler="http://flowable.org/modeler"><![CDATA[Docentes]]></modeler:group-info-name-docentes>
+        <modeler:activiti-idm-candidate-group xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-candidate-group>
+        <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+      </extensionElements>
+    </userTask>
+    <userTask id="sid-EDDAC05F-B007-4E01-8223-713A621E1188" name="Elaborar informe de resultados" flowable:candidateUsers="jefeDocente" flowable:formFieldValidation="true">
+      <extensionElements>
+        <modeler:user-info-email-jefeDocente xmlns:modeler="http://flowable.org/modeler"><![CDATA[jefeDocente@gmail.com]]></modeler:user-info-email-jefeDocente>
+        <modeler:user-info-firstname-jefeDocente xmlns:modeler="http://flowable.org/modeler"><![CDATA[David]]></modeler:user-info-firstname-jefeDocente>
+        <modeler:user-info-lastname-jefeDocente xmlns:modeler="http://flowable.org/modeler"><![CDATA[Luna]]></modeler:user-info-lastname-jefeDocente>
+        <modeler:activiti-idm-candidate-user xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-candidate-user>
+        <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+      </extensionElements>
+    </userTask>
     <sequenceFlow id="sid-CC530193-2B83-49B6-AD4C-87953953257D" sourceRef="sid-C7A155C5-1E73-45C8-B772-3700A7B6DA8B" targetRef="sid-5F142037-A40B-4861-971A-EC57BE2BEC21"></sequenceFlow>
     <sequenceFlow id="sid-66A7B094-E40E-485A-8DEB-0FFB0DF68C81" sourceRef="sid-5F142037-A40B-4861-971A-EC57BE2BEC21" targetRef="sid-4D7FB2AD-D7FA-44D6-B00A-200FCF1B7461"></sequenceFlow>
     <sequenceFlow id="sid-44AC5C22-1DB8-476F-9FD1-32CB0475860B" sourceRef="sid-276FCE33-636C-4E20-A8D9-F0331A07AEDC" targetRef="sid-3EBB93AC-2D16-40C1-88C9-BB8058BDD3E9"></sequenceFlow>
@@ -223,11 +323,14 @@
     <sequenceFlow id="sid-9CF578F1-D4AB-4D87-AC23-32CC6E2C2C9F" sourceRef="sid-0E1EA514-6D29-40B5-BFF9-3CF74DF444AD" targetRef="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2"></sequenceFlow>
     <sequenceFlow id="sid-88FC4336-3B80-491C-B1FB-D453722A3263" sourceRef="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2" targetRef="sid-EDDAC05F-B007-4E01-8223-713A621E1188"></sequenceFlow>
     <sequenceFlow id="sid-D3367576-C647-4408-9F27-2B7A15BEA589" sourceRef="sid-EDDAC05F-B007-4E01-8223-713A621E1188" targetRef="sid-B6D61931-87C0-4758-AAA9-6546C5AF7F92"></sequenceFlow>
+<<<<<<< HEAD:proyecto/src/main/resources/Institucion_de_capacitacion.bpmn20.xml
     <sequenceFlow id="sid-B7D5443B-B958-41F8-9A64-2688CD578B0E" name="Si" sourceRef="sid-9BA9209A-DF82-42F9-B3D9-75D55783CDCA" targetRef="sid-DAB336A9-0845-4786-96BD-E5C4BBBA0BA2">
       <extensionElements>
         <flowable:executionListener event="start" expression="${execution.setVariable('resultado', 'CERRADO_POR_FALTA_DE_RESPUESTA')}"></flowable:executionListener>
       </extensionElements>
     </sequenceFlow>
+=======
+>>>>>>> 25176e2cdf69396518fd673f0ebc1caa22367d80:proyecto/src/main/resources/OrganizacionCursosv2.bpmn20.xml
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration">
     <bpmndi:BPMNPlane bpmnElement="Collaboration" id="BPMNPlane_Collaboration">
@@ -247,7 +350,7 @@
         <omgdc:Bounds height="28.0" width="28.0" x="324.999997317791" y="415.99999418854725"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sid-4743C649-78C8-4B6D-8CC4-D51704E7AEFE" id="BPMNShape_sid-4743C649-78C8-4B6D-8CC4-D51704E7AEFE">
-        <omgdc:Bounds height="80.0" width="100.0" x="329.99999508261686" y="254.99999240040796"></omgdc:Bounds>
+        <omgdc:Bounds height="80.0" width="100.0" x="329.999980330468" y="254.99998860061208"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sid-5F142037-A40B-4861-971A-EC57BE2BEC21" id="BPMNShape_sid-5F142037-A40B-4861-971A-EC57BE2BEC21">
         <omgdc:Bounds height="80.0" width="99.99999999999997" x="55.249996494501964" y="254.99999620020395"></omgdc:Bounds>
@@ -313,7 +416,7 @@
         <omgdc:Bounds height="40.0" width="40.0" x="1184.9999823421242" y="539.9999839067463"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sid-FC42B03B-500A-4344-A46D-C18448C77F0D" id="BPMNShape_sid-FC42B03B-500A-4344-A46D-C18448C77F0D">
-        <omgdc:Bounds height="80.00000000000006" width="100.0" x="594.191408798307" y="656.9696451509747"></omgdc:Bounds>
+        <omgdc:Bounds height="80.00000000000006" width="100.0" x="584.999982565642" y="644.9999807775026"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846" id="BPMNShape_sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846">
         <omgdc:Bounds height="40.0" width="40.0" x="739.3749496092896" y="677.2145056381013"></omgdc:Bounds>
@@ -410,8 +513,15 @@
         <omgdi:waypoint x="227.11110814191682" y="389.99999418854725"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-FDF4BF48-842E-4EC9-B0C4-70C261889E86" id="BPMNEdge_sid-FDF4BF48-842E-4EC9-B0C4-70C261889E86" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.00000000000003" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+<<<<<<< HEAD:proyecto/src/main/resources/Institucion_de_capacitacion.bpmn20.xml
         <omgdi:waypoint x="694.1414087983069" y="697.0758302990077"></omgdi:waypoint>
         <omgdi:waypoint x="739.376250377972" y="697.172079253542"></omgdi:waypoint>
+=======
+        <omgdi:waypoint x="684.9499825656419" y="684.9999807775026"></omgdi:waypoint>
+        <omgdi:waypoint x="712.1874660874657" y="684.9999807775027"></omgdi:waypoint>
+        <omgdi:waypoint x="712.1874660874657" y="697.2145056381013"></omgdi:waypoint>
+        <omgdi:waypoint x="739.3749496092896" y="697.2145056381013"></omgdi:waypoint>
+>>>>>>> 25176e2cdf69396518fd673f0ebc1caa22367d80:proyecto/src/main/resources/OrganizacionCursosv2.bpmn20.xml
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-5C25A9FF-7C21-4CFF-8062-A82B798E8857" id="BPMNEdge_sid-5C25A9FF-7C21-4CFF-8062-A82B798E8857" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
         <omgdi:waypoint x="1224.9373717226551" y="559.9999839067463"></omgdi:waypoint>
@@ -447,8 +557,8 @@
         <omgdi:waypoint x="200.24999649450194" y="294.99999620020395"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-D5D8F266-D7B5-4FDC-A193-150E3F7EB3CC" id="BPMNEdge_sid-D5D8F266-D7B5-4FDC-A193-150E3F7EB3CC" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="49.99999999999997" flowable:targetDockerY="40.0">
-        <omgdi:waypoint x="379.9999931156636" y="254.99999240040796"></omgdi:waypoint>
-        <omgdi:waypoint x="379.9999921297284" y="234.94999500811113"></omgdi:waypoint>
+        <omgdi:waypoint x="379.9999842594572" y="254.99998860061208"></omgdi:waypoint>
+        <omgdi:waypoint x="379.9999862313273" y="234.94999500811113"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-4356DC94-0B04-4200-96D6-8E46F6FED53A" id="BPMNEdge_sid-4356DC94-0B04-4200-96D6-8E46F6FED53A" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="15.0" flowable:targetDockerY="15.0">
         <omgdi:waypoint x="495.38504609847394" y="215.33534248390146"></omgdi:waypoint>
@@ -539,8 +649,13 @@
         <omgdi:waypoint x="686.4000476074992" y="1110.442030773836"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-71A84C04-E3E9-4DB7-91AB-7F10AFD056B5" id="BPMNEdge_sid-71A84C04-E3E9-4DB7-91AB-7F10AFD056B5" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+<<<<<<< HEAD:proyecto/src/main/resources/Institucion_de_capacitacion.bpmn20.xml
         <omgdi:waypoint x="240.19375674317402" y="294.99999572448615"></omgdi:waypoint>
         <omgdi:waypoint x="329.999995082526" y="294.9999935885132"></omgdi:waypoint>
+=======
+        <omgdi:waypoint x="240.1937572167997" y="294.99999524876836"></omgdi:waypoint>
+        <omgdi:waypoint x="329.99997975173574" y="294.9999909768228"></omgdi:waypoint>
+>>>>>>> 25176e2cdf69396518fd673f0ebc1caa22367d80:proyecto/src/main/resources/OrganizacionCursosv2.bpmn20.xml
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-F57FCDFB-92B1-44C2-B062-F0EF77A8A1FB" id="BPMNEdge_sid-F57FCDFB-92B1-44C2-B062-F0EF77A8A1FB" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="862.0573749074357" y="715.4662923691137"></omgdi:waypoint>
@@ -575,8 +690,15 @@
         <omgdi:waypoint x="761.3168899660607" y="1435.5579295843336"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-79CAD175-AC87-4F8A-A73C-AD6EE0474DE0" id="BPMNEdge_sid-79CAD175-AC87-4F8A-A73C-AD6EE0474DE0" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.00000000000003">
+<<<<<<< HEAD:proyecto/src/main/resources/Institucion_de_capacitacion.bpmn20.xml
         <omgdi:waypoint x="644.1914164043604" y="575.0293984491701"></omgdi:waypoint>
         <omgdi:waypoint x="644.191411291364" y="656.9696451509747"></omgdi:waypoint>
+=======
+        <omgdi:waypoint x="644.191417652449" y="575.0183050235387"></omgdi:waypoint>
+        <omgdi:waypoint x="644.191417652449" y="610.0432017304892"></omgdi:waypoint>
+        <omgdi:waypoint x="634.999982565642" y="610.0432017304892"></omgdi:waypoint>
+        <omgdi:waypoint x="634.999982565642" y="644.9999807775026"></omgdi:waypoint>
+>>>>>>> 25176e2cdf69396518fd673f0ebc1caa22367d80:proyecto/src/main/resources/OrganizacionCursosv2.bpmn20.xml
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-19BCD512-B2D4-4480-B35E-4F0FAE837753" id="BPMNEdge_sid-19BCD512-B2D4-4480-B35E-4F0FAE837753" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="663.0132396646607" y="553.9554171819335"></omgdi:waypoint>
