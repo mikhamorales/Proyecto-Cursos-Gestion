@@ -10,7 +10,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;   -- para hashear contraseñas de empre
 -- ---------------------------------------------------------------------
 -- 1. EMPRESAS solicitantes
 -- ---------------------------------------------------------------------
-CREATE TABLE empresa IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS empresa  (
     id                  SERIAL PRIMARY KEY,
     razon_social        VARCHAR(150) NOT NULL,
     cuit                VARCHAR(20)  NOT NULL UNIQUE,
@@ -25,7 +25,7 @@ CREATE TABLE empresa IF NOT EXISTS (
 -- 2. CUENTA DE ACCESO de la empresa (actividad "Habilitar acceso de la empresa")
 --    Una cuenta por empresa; se reutiliza si contrata otro curso.
 -- ---------------------------------------------------------------------
-CREATE TABLE cuenta_empresa IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS cuenta_empresa  (
     id              SERIAL PRIMARY KEY,
     empresa_id      INTEGER NOT NULL UNIQUE REFERENCES empresa(id) ON DELETE CASCADE,
     usuario         VARCHAR(60) NOT NULL UNIQUE,
@@ -36,7 +36,7 @@ CREATE TABLE cuenta_empresa IF NOT EXISTS (
 -- ---------------------------------------------------------------------
 -- 3. CURSOS (cada solicitud = un curso = una instancia de proceso en Flowable)
 -- ---------------------------------------------------------------------
-CREATE TABLE curso IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS curso  (
     id                       SERIAL PRIMARY KEY,
     empresa_id               INTEGER NOT NULL REFERENCES empresa(id),
     process_instance_id      VARCHAR(64) UNIQUE,      -- ID de la instancia en Flowable
@@ -67,7 +67,7 @@ CREATE INDEX idx_curso_estado  ON curso(estado);
 -- ---------------------------------------------------------------------
 -- 4. PROPUESTAS 
 -- ---------------------------------------------------------------------
-CREATE TABLE propuesta (
+CREATE TABLE IF NOT EXISTS propuesta (
     id                SERIAL PRIMARY KEY,
     curso_id          INTEGER NOT NULL REFERENCES curso(id) ON DELETE CASCADE,
     version_          INTEGER NOT NULL CHECK (version_ >= 1),
