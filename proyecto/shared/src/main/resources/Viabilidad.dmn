@@ -1,0 +1,29 @@
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="definition_2ccfd2f2-dc8e-11f1-a6de-4e4ce600a710" name="Viabilidad" namespace="http://www.flowable.org/dmn" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+  <decision id="viabilidad" name="Viabilidad">
+    <decisionTable id="decisionTable_84357c09-6075-461c-83ec-9ba4183a67fd" hitPolicy="FIRST">
+      <input>
+        <inputExpression id="inputExpression_cc6151c4-380c-4f67-b6d4-9ccc1380b7d5" typeRef="number">
+          <text>CursosEnPreparacion</text>
+        </inputExpression>
+      </input>
+      <output id="outputExpression_330aa4ca-7e44-4b57-a18f-700abccc975a" name="viable" typeRef="boolean"></output>
+      <rule>
+        <inputEntry id="inputEntry_cc6151c4-380c-4f67-b6d4-9ccc1380b7d5_1">
+          <text><![CDATA[>= 5]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_330aa4ca-7e44-4b57-a18f-700abccc975a_1">
+          <text><![CDATA[false]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_cc6151c4-380c-4f67-b6d4-9ccc1380b7d5_2">
+          <text><![CDATA[< 5]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_330aa4ca-7e44-4b57-a18f-700abccc975a_2">
+          <text><![CDATA[true]]></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI></dmndi:DMNDI>
+</definitions>
