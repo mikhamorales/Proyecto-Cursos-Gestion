@@ -3,9 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web administracion</title>
+    <title>Solicitud de capacitacion</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
 </head>
 <body>
-    <h1>Web administracion: esqueleto funcionando</h1>
+<div class="layout">
+
+    <section class="panel panel-solicitud">
+        <h1>Solicitar una capacitacion</h1>
+
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <form th:action="@{/solicitudes}" th:object="${solicitudForm}" method="post">
+
+            <fieldset>
+                <legend>Empresa</legend>
+                <label for="empresa">Nombre</label>
+                <input type="text" id="empresa" th:field="*{empresa}">
+                <p class="field-error" th:if="${#fields.hasErrors('empresa')}" th:errors="*{empresa}"></p>
+            </fieldset>
+
+            <fieldset>
+                <legend>Contacto</legend>
+                <label for="contactoNombre">Nombre</label>
+                <input type="text" id="contactoNombre" th:field="*{contactoNombre}">
+                <p class="field-error" th:if="${#fields.hasErrors('contactoNombre')}" th:errors="*{contactoNombre}"></p>
+
+                <label for="contactoEmail">Email</label>
+                <input type="email" id="contactoEmail" th:field="*{contactoEmail}">
+                <p class="field-error" th:if="${#fields.hasErrors('contactoEmail')}" th:errors="*{contactoEmail}"></p>
+
+                <label for="contactoTelefono">Telefono</label>
+                <input type="text" id="contactoTelefono" th:field="*{contactoTelefono}">
+                <p class="field-error" th:if="${#fields.hasErrors('contactoTelefono')}" th:errors="*{contactoTelefono}"></p>
+            </fieldset>
+
+            <fieldset>
+                <legend>Capacitacion</legend>
+                <label for="tematica">Tematica</label>
+                <input type="text" id="tematica" th:field="*{tematica}">
+                <p class="field-error" th:if="${#fields.hasErrors('tematica')}" th:errors="*{tematica}"></p>
+
+                <label for="descripcion">Descripcion</label>
+                <textarea id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
+                <p class="field-error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></p>
+            </fieldset>
+
+            <fieldset>
+                <legend>Participantes</legend>
+                <label for="cantidadParticipantes">Cantidad</label>
+                <input type="number" id="cantidadParticipantes" th:field="*{cantidadParticipantes}" min="1">
+                <p class="field-error" th:if="${#fields.hasErrors('cantidadParticipantes')}" th:errors="*{cantidadParticipantes}"></p>
+            </fieldset>
+
+            <fieldset>
+                <legend>Fechas</legend>
+                <label for="fechasPreferidas">Descripcion de fechas preferidas</label>
+                <textarea id="fechasPreferidas" th:field="*{fechasPreferidas}" rows="2"></textarea>
+                <p class="field-error" th:if="${#fields.hasErrors('fechasPreferidas')}" th:errors="*{fechasPreferidas}"></p>
+            </fieldset>
+
+            <button type="submit">Enviar solicitud</button>
+        </form>
+    </section>
+
+    <section class="panel panel-login">
+        <h1>Acceso empleados</h1>
+
+        <div th:if="${loginError}" class="alert alert-error" th:text="${loginError}"></div>
+
+        <form th:action="@{/login}" method="post">
+            <label for="usuario">Usuario</label>
+            <input type="text" id="usuario" name="usuario" required>
+
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Ingresar</button>
+        </form>
+    </section>
+
+</div>
 </body>
 </html>

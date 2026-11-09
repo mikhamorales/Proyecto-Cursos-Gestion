@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de empleados</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div class="layout-single">
+    <section class="panel">
+        <h1>Bienvenido, <span th:text="${usuario}">usuario</span></h1>
+        <p>Esta pantalla quedara disponible para las proximas tareas.</p>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit">Cerrar sesion</button>
+        </form>
+    </section>
+</div>
+</body>
+</html>
