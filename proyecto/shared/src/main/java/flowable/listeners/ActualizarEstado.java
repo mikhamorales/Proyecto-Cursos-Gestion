@@ -17,7 +17,7 @@ import org.flowable.engine.delegate.ExecutionListener;
  * Valores posibles de "resultado" (coinciden con el CHECK de la tabla curso):
  *   FINALIZADO | CANCELADO | RECHAZADO | CERRADO_POR_FALTA_DE_RESPUESTA | NO_VIABLE
  */
-public class ActualizarEstadoCursoListener implements ExecutionListener {
+public class ActualizarEstado implements ExecutionListener {
 
     private static final long serialVersionUID = 1L;
 
