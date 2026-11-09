@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS propuesta (
 -- ---------------------------------------------------------------------
 -- Datos de prueba
 -- ---------------------------------------------------------------------
-INSERT INTO empresa (razon_social, cuit, direccion, contacto_nombre, contacto_email, contacto_telefono) VALUES
+//*INSERT INTO empresa (razon_social, cuit, direccion, contacto_nombre, contacto_email, contacto_telefono) VALUES
  ('Acme S.A.',            '30-11111111-1', 'Av. Sabattini 100, Río Cuarto',  'Laura Pérez',   'laura@acme.com',     '358-4111111'),
  ('Agroindustrias del Sur','30-22222222-2', 'Ruta 8 km 603, Río Cuarto',      'Martín Gómez',  'martin@agrosur.com', '358-4222222'),
  ('TecnoSoft SRL',        '30-33333333-3', 'Belgrano 450, Córdoba',          'Ana Rodríguez', 'ana@tecnosoft.com',  '351-4333333');
@@ -120,4 +120,5 @@ SELECT c.id, c.nombre, c.estado, c.fecha_inicio, c.process_instance_id,
        e.id AS empresa_id, ce.usuario
 FROM curso c
 JOIN empresa e ON e.id = c.empresa_id
-LEFT JOIN cuenta_empresa ce ON ce.empresa_id = e.id;
+LEFT JOIN cuenta_empresa ce ON ce.empresa_id = e.id;*//
+
