@@ -23,9 +23,15 @@ public class EstadoEnPreparacion implements ExecutionListener {
         try (Connection c = Database.get();
              PreparedStatement ps = c.prepareStatement(SQL)) {
             ps.setString(1, piid);
-            if (ps.executeUpdate() == 0) {
-                throw new FlowableException(
-                    "No hay un curso vinculado a la instancia " + piid + " (curso.process_instance_id)");
+            int filas = ps.executeUpdate();
+            if (filas == 0) {
+                // La solicitud puede no tener una fila en curso todavia (el formulario
+                // web solo inicia la instancia). No se corta el proceso por eso.
+                System.err.println("[EstadoEnPreparacion] No hay curso vinculado a la instancia "
+                        + piid + " (curso.process_instance_id). No se actualiza el estado.");
+            } else {
+                System.out.println("[EstadoEnPreparacion] Curso de la instancia "
+                        + piid + " -> EN_PREPARACION");
             }
         } catch (SQLException e) {
             throw new FlowableException("Error actualizando el estado EN_PREPARACION", e);

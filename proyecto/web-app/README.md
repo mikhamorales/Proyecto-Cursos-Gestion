@@ -26,6 +26,7 @@ La pantalla principal (`/`) tiene dos paneles:
 | `flowable.rest.username` | `admin` | Usuario de la API REST |
 | `flowable.rest.password` | `test` | Clave de la API REST |
 | `flowable.process-definition-key` | `process` | Clave del proceso BPMN que inicia el formulario |
+| `flowable.admin.username` | `admin` | Usuario que ve el panel de simulación de mensajes en `/empleados` |
 
 Ajustá URL, puerto y credenciales a lo que use el `docker-compose.yml` del equipo.
 
@@ -84,6 +85,21 @@ Al enviar:
 
 La sesión guarda `usuario` y `password` para autenticar las próximas llamadas al motor con las credenciales del empleado logueado. La contraseña **no** se registra en logs.
 
+### Panel de simulación de mensajes (solo admin)
+
+Si el usuario logueado coincide con `flowable.admin.username` (por defecto `admin`), `/empleados` muestra además una tabla con las instancias del proceso que están esperando un mensaje. Cada fila agrupa las suscripciones por `processInstanceId` y muestra un botón por mensaje disponible:
+
+| Mensaje | Botón | Efecto |
+|---|---|---|
+| `MModificacion` | Enviar modificaciones | Vuelve a la tarea "Revisar propuesta" |
+| `MRechazo` | Rechazar | Deriva a "Archivar solicitud" y termina en `RECHAZADO` |
+| `MAceptacion` | Aceptar | Entra al subproceso "Preparar curso" |
+| `MCancelacion` | Cancelar curso | Compensa recursos, notifica el cierre y termina en `CANCELADO` |
+
+El envío hace `PUT /runtime/executions/{executionId}` con `{"action":"messageEventReceived","messageName":"..."}`. Antes de enviar se valida que la suscripción siga existiendo; si ya no está, se muestra "La instancia ya no espera ese mensaje.".
+
+> El panel necesita que el BPMN (con los `messageEventDefinition`) y el DMN `viabilidad` estén desplegados en el motor. Los archivos viven en `proyecto/shared/src/resources/` y se despliegan a mano; no se empaquetan en el jar de `shared`.
+
 ## Estructura de carpetas
 
 ```
@@ -98,9 +114,11 @@ web-app/
     │   ├── java/com/proyecto/web/
     │   │   ├── WebApplication.java
     │   │   ├── controller/        # SolicitudController, LoginController
-    │   │   ├── service/           # SolicitudService, AuthService
+    │   │   ├── service/           # SolicitudService, AuthService, SimulacionService
     │   │   ├── client/            # FlowableRestClient
-    │   │   ├── model/             # SolicitudForm, VariableRequest, StartProcessRequest
+    │   │   ├── model/             # SolicitudForm, VariableRequest, StartProcessRequest,
+    │   │   │                      # EventSubscription, ProcessVariable, MessageEventRequest,
+    │   │   │                      # AccionSimulable, InstanciaSimulable, FlowableListResponse
     │   │   └── config/            # FlowableRestConfig
     │   └── resources/
     │       ├── application.properties
@@ -120,5 +138,4 @@ Cada paquete tiene un `package-info.java` con su propósito, para que Git conser
 
 - **Puerto 8081 ocupado**: cambiá `server.port` en `application.properties`.
 - **Flowable no responde**: verificá que Docker y el contenedor estén arriba (`docker compose ps`).
-- **Credenciales incorrectas**: revisá `flowable.rest.username` / `flowable.rest.password` contra el `docker-compose.yml`.
 - **El formulario devuelve error HTTP**: confirmá que el proceso `process` esté desplegado en Flowable (`GET /flowable-ui/process-api/repository/process-definitions?key=process`).

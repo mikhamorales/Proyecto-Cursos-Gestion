@@ -3,7 +3,7 @@
     <decisionTable id="decisionTable_84357c09-6075-461c-83ec-9ba4183a67fd" hitPolicy="FIRST">
       <input>
         <inputExpression id="inputExpression_cc6151c4-380c-4f67-b6d4-9ccc1380b7d5" typeRef="number">
-          <text>CursosEnPreparacion</text>
+          <text>cursosEnPreparacion</text>
         </inputExpression>
       </input>
       <output id="outputExpression_330aa4ca-7e44-4b57-a18f-700abccc975a" name="viable" typeRef="boolean"></output>

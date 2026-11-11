@@ -15,6 +15,53 @@
             <button type="submit">Cerrar sesion</button>
         </form>
     </section>
+
+    <section class="panel" th:if="${esAdmin}">
+        <h1>Simulacion de mensajes</h1>
+        <p>
+            Instancias del proceso que estan esperando un mensaje. Los botones simulan
+            la recepcion del evento correspondiente.
+        </p>
+
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <p th:if="${#lists.isEmpty(instancias)}">No hay instancias esperando mensajes.</p>
+
+        <table class="tabla-simulacion" th:unless="${#lists.isEmpty(instancias)}">
+            <thead>
+            <tr>
+                <th>Empresa</th>
+                <th>Tematica</th>
+                <th>Instancia</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="inst : ${instancias}">
+                <td th:text="${inst.empresa}"></td>
+                <td th:text="${inst.tematica}"></td>
+                <td th:text="${#strings.abbreviate(inst.processInstanceId, 12)}"></td>
+                <td>
+                    <div class="acciones-simulacion">
+                        <form th:each="accion : ${inst.acciones}"
+                              th:action="@{/empleados/simular}" method="post">
+                            <input type="hidden" name="executionId" th:value="${accion.executionId}">
+                            <input type="hidden" name="messageName" th:value="${accion.eventName}">
+                            <button type="submit"
+                                    th:text="${accion.etiqueta}"
+                                    th:classappend="${accion.peligro} ? 'btn-simulacion-peligro' : 'btn-simulacion'"></button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel" th:unless="${esAdmin}">
+        <p>El panel de simulacion de mensajes esta disponible solo para el usuario administrador.</p>
+    </section>
 </div>
 </body>
 </html>

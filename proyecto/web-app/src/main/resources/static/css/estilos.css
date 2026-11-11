@@ -19,9 +19,13 @@ body {
 }
 
 .layout-single {
-    max-width: 600px;
+    max-width: 1000px;
     margin: 2rem auto;
     padding: 0 1rem;
+}
+
+.layout-single .panel + .panel {
+    margin-top: 1.5rem;
 }
 
 .panel {
@@ -105,4 +109,54 @@ button:hover {
     .layout {
         grid-template-columns: 1fr;
     }
+}
+
+.tabla-simulacion {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.tabla-simulacion th,
+.tabla-simulacion td {
+    border: 1px solid #e4e7eb;
+    padding: 0.5rem 0.6rem;
+    text-align: left;
+    font-size: 0.9rem;
+    vertical-align: top;
+}
+
+.tabla-simulacion th {
+    background: #f4f6f8;
+}
+
+.acciones-simulacion {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.btn-simulacion,
+.btn-simulacion-peligro {
+    margin-top: 0;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.btn-simulacion {
+    background: #f59e0b;
+    color: #1f2933;
+}
+
+.btn-simulacion:hover {
+    background: #d97706;
+}
+
+.btn-simulacion-peligro {
+    background: #dc2626;
+    color: #fff;
+}
+
+.btn-simulacion-peligro:hover {
+    background: #b91c1c;
 }

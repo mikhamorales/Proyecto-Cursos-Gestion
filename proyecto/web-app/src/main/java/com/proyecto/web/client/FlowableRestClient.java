@@ -1,14 +1,22 @@
 package com.proyecto.web.client;
 
+import com.proyecto.web.model.EventSubscription;
+import com.proyecto.web.model.FlowableListResponse;
+import com.proyecto.web.model.MessageEventRequest;
+import com.proyecto.web.model.ProcessVariable;
 import com.proyecto.web.model.StartProcessRequest;
+import com.proyecto.web.model.VariableRequest;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
+
+import java.util.List;
 
 /**
  * Cliente HTTP hacia Flowable. Centraliza las llamadas REST y traduce los
@@ -79,6 +87,70 @@ public class FlowableRestClient {
             }
             throw new FlowableUnavailableException(
                     "Flowable respondio con error (HTTP " + e.getStatusCode().value() + ").", e);
+        } catch (ResourceAccessException e) {
+            throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
+        }
+    }
+
+    /**
+     * Lista las suscripciones a eventos de tipo mensaje.
+     */
+    public List<EventSubscription> listMessageSubscriptions() {
+        try {
+            FlowableListResponse<EventSubscription> response = processClient.get()
+                    .uri("/runtime/event-subscriptions?eventType=message")
+                    .headers(headers -> headers.setBasicAuth(username, password))
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<FlowableListResponse<EventSubscription>>() {
+                    });
+            if (response == null || response.data() == null) {
+                return List.of();
+            }
+            return response.data();
+        } catch (RestClientResponseException e) {
+            throw new FlowableUnavailableException(
+                    "Flowable rechazo la consulta de mensajes (HTTP "
+                            + e.getStatusCode().value() + ").", e);
+        } catch (ResourceAccessException e) {
+            throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
+        }
+    }
+
+    /**
+     * Devuelve las variables de una instancia de proceso.
+     */
+    public List<ProcessVariable> getProcessInstanceVariables(String processInstanceId) {
+        try {
+            ProcessVariable[] variables = processClient.get()
+                    .uri("/runtime/process-instances/{id}/variables", processInstanceId)
+                    .headers(headers -> headers.setBasicAuth(username, password))
+                    .retrieve()
+                    .body(ProcessVariable[].class);
+            return variables == null ? List.of() : List.of(variables);
+        } catch (RestClientResponseException e) {
+            throw new FlowableUnavailableException(
+                    "Flowable rechazo la consulta de variables (HTTP "
+                            + e.getStatusCode().value() + ").", e);
+        } catch (ResourceAccessException e) {
+            throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
+        }
+    }
+
+    /**
+     * Envia un mensaje a una ejecucion para disparar un evento de recepcion.
+     */
+    public void sendMessage(String executionId, String messageName, List<VariableRequest> variables) {
+        try {
+            processClient.put()
+                    .uri("/runtime/executions/{id}", executionId)
+                    .headers(headers -> headers.setBasicAuth(username, password))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(new MessageEventRequest("messageEventReceived", messageName, variables))
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (RestClientResponseException e) {
+            throw new FlowableUnavailableException(
+                    "Flowable rechazo el mensaje (HTTP " + e.getStatusCode().value() + ").", e);
         } catch (ResourceAccessException e) {
             throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
         }

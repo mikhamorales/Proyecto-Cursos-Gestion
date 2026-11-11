@@ -3,6 +3,12 @@
   <collaboration id="Collaboration">
     <participant id="sid-C749F9BC-9462-46A2-857A-79C5D5EFC0C9" name="Institucion de capacitacion" processRef="process"></participant>
   </collaboration>
+  <message id="MSolicitudRecibida" name="MSolicitudRecibida"></message>
+  <message id="MModificacion" name="MModificacion"></message>
+  <message id="MRechazo" name="MRechazo"></message>
+  <message id="MAceptacion" name="MAceptacion"></message>
+  <message id="MCancelacion" name="MCancelacion"></message>
+  <error id="cancelacionError" errorCode="CANCELACION"></error>
   <process id="process" name="Institucion de capacitacion" isExecutable="true">
     <extensionElements>
       <flowable:executionListener event="end" class="flowable.listeners.ActualizarEstado"></flowable:executionListener>
@@ -75,7 +81,7 @@
       </lane>
     </laneSet>
     <startEvent id="mSolicitudRecibida" name="Solicitud recibida" isInterrupting="true">
-      <messageEventDefinition></messageEventDefinition>
+      <messageEventDefinition messageRef="MSolicitudRecibida"></messageEventDefinition>
     </startEvent>
     <exclusiveGateway id="sid-4D7FB2AD-D7FA-44D6-B00A-200FCF1B7461" name="Es viable"></exclusiveGateway>
     <endEvent id="sid-3EBB93AC-2D16-40C1-88C9-BB8058BDD3E9">
@@ -104,7 +110,7 @@ println "Tarea 'Enviar propuesta' alcanzada (contador de recordatorios en 0)"]]>
     </scriptTask>
     <eventBasedGateway id="sid-C15EDAE6-E5D5-4867-99D8-57155B4AD0FC" name="Esperar respuesta"></eventBasedGateway>
     <intermediateCatchEvent id="mModificacion" name="Modificaciones">
-      <messageEventDefinition></messageEventDefinition>
+      <messageEventDefinition messageRef="MModificacion"></messageEventDefinition>
     </intermediateCatchEvent>
     <userTask id="sid-84A2E6BE-F9B1-414B-A40C-F347E750CDCB" name="Revisar propuesta" flowable:assignee="jefeAdmin" flowable:formFieldValidation="true">
       <extensionElements>
@@ -146,10 +152,10 @@ println "Recordatorio nro " + n + " enviado"]]></script>
       <extensionElements>
         <flowable:executionListener event="end" expression="${execution.setVariable('resultado', 'RECHAZADO')}"></flowable:executionListener>
       </extensionElements>
-      <messageEventDefinition></messageEventDefinition>
+      <messageEventDefinition messageRef="MRechazo"></messageEventDefinition>
     </intermediateCatchEvent>
     <intermediateCatchEvent id="mAceptacion" name="Aceptacion">
-      <messageEventDefinition></messageEventDefinition>
+      <messageEventDefinition messageRef="MAceptacion"></messageEventDefinition>
     </intermediateCatchEvent>
     <scriptTask id="sid-E7B32F63-5E82-49E2-93EB-CDA41E899BD0" name="Habilitar acceso de la empresa" scriptFormat="groovy" flowable:autoStoreVariables="false">
       <extensionElements>
@@ -167,9 +173,10 @@ execution.setVariable('accesoHabilitado', true)]]></script>
           <flowable:executionListener event="end" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
         </extensionElements>
       </receiveTask>
-      <userTask id="sid-6443AE13-2ACF-4CC6-AE8A-F6ADACC2DFC4" name="Confeccionar lista definitiva" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
-        <extensionElements>
-          <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
+    <userTask id="sid-6443AE13-2ACF-4CC6-AE8A-F6ADACC2DFC4" name="Confeccionar lista definitiva" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+      <extensionElements>
+        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
+        <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
@@ -177,10 +184,10 @@ execution.setVariable('accesoHabilitado', true)]]></script>
           <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
         </extensionElements>
       </userTask>
-      <userTask id="sid-E0F8C31B-8D21-4CBC-A2A7-C7213EA7FBFB" name="Preparar materiales" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
-        <extensionElements>
-          <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
-          <flowable:taskListener event="assignment" class="flowable.listeners.EstadoEnPreparacion"></flowable:taskListener>
+    <userTask id="sid-E0F8C31B-8D21-4CBC-A2A7-C7213EA7FBFB" name="Preparar materiales" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+      <extensionElements>
+        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
+        <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
           <modeler:activiti-idm-candidate-group xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-candidate-group>
@@ -188,9 +195,10 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         </extensionElements>
       </userTask>
       <parallelGateway id="sid-CF1955EC-B385-48C5-8E83-88EA58EEC24E" name="Preparacion completa"></parallelGateway>
-      <userTask id="sid-FC42B03B-500A-4344-A46D-C18448C77F0D" name="Evaluar recursos" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
-        <extensionElements>
-          <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
+    <userTask id="sid-FC42B03B-500A-4344-A46D-C18448C77F0D" name="Evaluar recursos" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+      <extensionElements>
+        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
+        <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
@@ -199,24 +207,27 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         </extensionElements>
       </userTask>
       <inclusiveGateway id="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846"></inclusiveGateway>
-      <serviceTask id="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D" name="Reservar aula">
+      <scriptTask id="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D" name="Reservar aula" scriptFormat="groovy" flowable:autoStoreVariables="false">
         <extensionElements>
           <flowable:executionListener event="start" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
           <flowable:executionListener event="end" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
         </extensionElements>
-      </serviceTask>
+        <script><![CDATA[println "Tarea 'Reservar aula' alcanzada: se simula la reserva del aula fisica contra el web service"]]></script>
+      </scriptTask>
       <boundaryEvent id="sid-8809100B-A6B1-4472-A02F-8273B4CD527A" attachedToRef="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D" cancelActivity="false">
         <compensateEventDefinition></compensateEventDefinition>
       </boundaryEvent>
-      <serviceTask id="sid-C5D62DD3-223B-479A-9F46-D3BCD2AC2E90" name="Liberar aula" isForCompensation="true">
+      <scriptTask id="sid-C5D62DD3-223B-479A-9F46-D3BCD2AC2E90" name="Liberar aula" isForCompensation="true" scriptFormat="groovy" flowable:autoStoreVariables="false">
         <extensionElements>
           <flowable:executionListener event="start" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
           <flowable:executionListener event="end" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
         </extensionElements>
-      </serviceTask>
-      <userTask id="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" name="Solicitar aula virtual" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
-        <extensionElements>
-          <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
+        <script><![CDATA[println "Tarea 'Liberar aula' alcanzada: se simula la liberacion del aula fisica contra el web service"]]></script>
+      </scriptTask>
+    <userTask id="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" name="Solicitar aula virtual" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+      <extensionElements>
+        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
+        <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
@@ -227,15 +238,17 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       <boundaryEvent id="sid-C925B450-2C19-455D-AB88-8A1337014BFE" attachedToRef="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" cancelActivity="false">
         <compensateEventDefinition></compensateEventDefinition>
       </boundaryEvent>
-      <serviceTask id="sid-CA860AD7-83F9-4734-A709-41F01D88805C" name="Liberar aula virtual" isForCompensation="true">
+      <scriptTask id="sid-CA860AD7-83F9-4734-A709-41F01D88805C" name="Liberar aula virtual" isForCompensation="true" scriptFormat="groovy" flowable:autoStoreVariables="false">
         <extensionElements>
           <flowable:executionListener event="start" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
           <flowable:executionListener event="end" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
         </extensionElements>
-      </serviceTask>
-      <userTask id="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" name="Contratar equipamiento" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
-        <extensionElements>
-          <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
+        <script><![CDATA[println "Tarea 'Liberar aula virtual' alcanzada: se simula la liberacion del aula virtual contra el web service"]]></script>
+      </scriptTask>
+    <userTask id="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" name="Contratar equipamiento" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+      <extensionElements>
+        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
+        <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
@@ -246,9 +259,10 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       <boundaryEvent id="sid-A5E9DA16-D099-439B-B683-ED017EACD460" attachedToRef="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" cancelActivity="false">
         <compensateEventDefinition></compensateEventDefinition>
       </boundaryEvent>
-      <userTask id="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8" name="Liberar equipamiento" isForCompensation="true" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
-        <extensionElements>
-          <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
+    <userTask id="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8" name="Liberar equipamiento" isForCompensation="true" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+      <extensionElements>
+        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
+        <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
@@ -259,14 +273,14 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       <inclusiveGateway id="sid-E3A32C56-8536-4526-A638-448A00454329"></inclusiveGateway>
       <endEvent id="sid-580555E0-7EE2-4816-AC85-43385A15AB16"></endEvent>
       <subProcess id="sid-4FB5F0E1-8B49-4A9B-A61F-F88998976055" name="subProcess" triggeredByEvent="true">
-        <startEvent id="mCancelacion" name="Recibir cancelacion" isInterrupting="true">
-          <messageEventDefinition></messageEventDefinition>
+        <startEvent id="mCancelacion" name="Recibir cancelacion" isInterrupting="false">
+          <messageEventDefinition messageRef="MCancelacion"></messageEventDefinition>
         </startEvent>
         <intermediateThrowEvent id="sid-63F249DB-2D11-4826-909A-1BAC6387A7B1" name="Cancelacion">
           <compensateEventDefinition></compensateEventDefinition>
         </intermediateThrowEvent>
         <endEvent id="sid-7DB5821B-E167-4B42-8125-D4C474F97812">
-          <errorEventDefinition flowable:errorVariableLocalScope="true" flowable:errorVariableTransient="true"></errorEventDefinition>
+          <errorEventDefinition errorRef="cancelacionError" flowable:errorVariableLocalScope="true" flowable:errorVariableTransient="true"></errorEventDefinition>
         </endEvent>
         <sequenceFlow id="sid-8EB61A78-9FA7-4A4D-B53A-709277309FF2" sourceRef="mCancelacion" targetRef="sid-63F249DB-2D11-4826-909A-1BAC6387A7B1"></sequenceFlow>
         <sequenceFlow id="sid-57E49302-4AEE-47D7-B6D9-39F0B44C8B34" sourceRef="sid-63F249DB-2D11-4826-909A-1BAC6387A7B1" targetRef="sid-7DB5821B-E167-4B42-8125-D4C474F97812"></sequenceFlow>
@@ -292,7 +306,7 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       <sequenceFlow id="sid-5C25A9FF-7C21-4CFF-8062-A82B798E8857" sourceRef="sid-CF1955EC-B385-48C5-8E83-88EA58EEC24E" targetRef="sid-580555E0-7EE2-4816-AC85-43385A15AB16"></sequenceFlow>
     </subProcess>
     <boundaryEvent id="sid-57B38179-860F-413B-8BE6-0E6B0DEAC2F2" attachedToRef="sid-0A76783B-105D-4AEC-BADC-08324A35A1FD">
-      <errorEventDefinition flowable:errorVariableLocalScope="true" flowable:errorVariableTransient="true"></errorEventDefinition>
+      <errorEventDefinition errorRef="cancelacionError" flowable:errorVariableLocalScope="true" flowable:errorVariableTransient="true"></errorEventDefinition>
     </boundaryEvent>
     <scriptTask id="sid-6F5E6AD0-F82B-4B6F-8CA5-BEC8AE301003" name="Notificar cierre" scriptFormat="groovy" flowable:autoStoreVariables="false">
       <script><![CDATA[println "Tarea 'Notificar cierre' alcanzada"]]></script>
@@ -327,6 +341,9 @@ execution.setVariable('accesoHabilitado', true)]]></script>
     </endEvent>
     <serviceTask id="sid-5F142037-A40B-4861-971A-EC57BE2BEC21" name="Evaluar viabilidad" flowable:type="dmn">
       <extensionElements>
+        <flowable:field name="decisionTableReferenceKey">
+          <flowable:string><![CDATA[viabilidad]]></flowable:string>
+        </flowable:field>
         <flowable:field name="decisionTaskThrowErrorOnNoHits">
           <flowable:string><![CDATA[false]]></flowable:string>
         </flowable:field>
@@ -336,6 +353,7 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         <flowable:field name="sameDeployment">
           <flowable:string><![CDATA[false]]></flowable:string>
         </flowable:field>
+        <flowable:executionListener event="start" class="flowable.listeners.ContarActivas"></flowable:executionListener>
         <flowable:executionListener event="start" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
         <flowable:executionListener event="end" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
       </extensionElements>
