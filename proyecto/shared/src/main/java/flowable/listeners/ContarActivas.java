@@ -24,7 +24,7 @@ public class ContarActivas implements ExecutionListener {
 
     @Override
     public void notify(DelegateExecution execution) {
-        try (Connection c = InstitucionDb.get();
+        try (Connection c = Database.get();
              PreparedStatement ps = c.prepareStatement(SQL)) {
             ps.setString(1, execution.getProcessInstanceId());
             try (ResultSet rs = ps.executeQuery()) {

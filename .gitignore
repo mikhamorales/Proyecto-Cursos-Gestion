@@ -30,3 +30,7 @@ replay_pid*
 proyecto/target/
 
 openspec/
+
+issues/
+
+AGENTS.md

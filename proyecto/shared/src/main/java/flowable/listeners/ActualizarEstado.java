@@ -1,7 +1,6 @@
 package flowable.listeners;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 
 import org.flowable.engine.delegate.DelegateExecution;
@@ -21,11 +20,6 @@ public class ActualizarEstado implements ExecutionListener {
 
     private static final long serialVersionUID = 1L;
 
-    // --- Ajustar a tu entorno ---
-    private static final String URL  = "jdbc:postgresql://localhost:5432/institucion";
-    private static final String USER = "postgres";
-    private static final String PASS = "postgres";
-
     @Override
     public void notify(DelegateExecution execution) {
         String resultado = (String) execution.getVariable("resultado");
@@ -40,7 +34,7 @@ public class ActualizarEstado implements ExecutionListener {
         String sql = "UPDATE curso SET estado = ?, fecha_cierre = now() "
                    + "WHERE process_instance_id = ?";
 
-        try (Connection con = DriverManager.getConnection(URL, USER, PASS);
+        try (Connection con = Database.get();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, resultado);

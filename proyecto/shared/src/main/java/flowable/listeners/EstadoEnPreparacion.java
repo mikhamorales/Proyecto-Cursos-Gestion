@@ -20,7 +20,7 @@ public class EstadoEnPreparacion implements ExecutionListener {
     @Override
     public void notify(DelegateExecution execution) {
         String piid = execution.getProcessInstanceId();
-        try (Connection c = InstitucionDb.get();
+        try (Connection c = Database.get();
              PreparedStatement ps = c.prepareStatement(SQL)) {
             ps.setString(1, piid);
             if (ps.executeUpdate() == 0) {

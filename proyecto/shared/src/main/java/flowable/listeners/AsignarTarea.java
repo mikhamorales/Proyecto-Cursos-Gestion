@@ -40,7 +40,7 @@ public class AsignarTarea implements TaskListener {
         TaskService taskService = configuracion.getTaskService();
 
         List<User> administrativos = identityService.createUserQuery()
-                .memberOfGroup(GRUPO_ALUMNOS)
+                .memberOfGroup(GRUPO_ADMINISTRACION)
                 .orderByUserId().asc().list();
 
        /* if (administrativos.isEmpty()) {
