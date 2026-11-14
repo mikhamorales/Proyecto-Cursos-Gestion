@@ -13,6 +13,37 @@ La pantalla principal (`/`) tiene dos paneles:
 - Maven 3.9+ o el Maven Wrapper incluido (`./mvnw`)
 - Docker con Flowable y PostgreSQL corriendo (ver sección siguiente)
 
+## Preparar la base de datos de la institución
+
+La base `institucion` vive en el PostgreSQL del contenedor y **no** la crea Flowable: se carga a mano con el script `proyecto/shared/Database.sql`. Sin esa base, el panel de administración y los listeners del proceso no tienen dónde leer ni escribir.
+
+Requisito: el contenedor `flowable-postgres` tiene que estar arriba (`docker compose ps`).
+
+Desde el directorio `proyecto/shared/`, ejecutá:
+
+```bash
+docker exec -i flowable-postgres psql -U flowable -d postgres -v ON_ERROR_STOP=1 < Database.sql
+```
+
+Qué hace cada parte:
+
+- `docker exec -i flowable-postgres` corre `psql` **dentro** del contenedor. No hace falta tener `psql` instalado en el host.
+- `-U flowable -d postgres` se conecta como el usuario `flowable` a la base `postgres` (la de mantenimiento). El script hace `DROP DATABASE institucion` y `CREATE DATABASE institucion`, por eso hay que arrancar desde `postgres` y no desde `institucion`.
+- `-v ON_ERROR_STOP=1` corta al primer error en vez de seguir a ciegas.
+- `< Database.sql` le pasa el script por stdin (por eso el `-i`). Si preferís no cambiar de carpeta, usá la ruta completa: `... < /ruta/a/proyecto/shared/Database.sql`.
+
+> **Es destructivo**: el script arranca con `DROP DATABASE IF EXISTS institucion`, así que borra y recrea todo (tablas, datos de prueba y la vista `v_cursos_empresa`). No lo corras si ya tenés datos que querés conservar.
+
+Para verificar que quedó bien:
+
+```bash
+docker exec flowable-postgres psql -U flowable -d institucion -c '\dt'
+```
+
+Deberías ver las tablas `empresa`, `cuenta_empresa`, `curso` y `propuesta`.
+
+La conexión desde el host (pgAdmin, DBeaver, etc.) es `localhost:5432`, base `institucion`, usuario `flowable`, contraseña `flow123` (los valores del `.env` del compose). Los listeners del proceso, en cambio, usan `jdbc:postgresql://postgres:5432/institucion`: el hostname `postgres` es el nombre del servicio **dentro** de la red de Docker.
+
 ## Configuración
 
 `src/main/resources/application.properties`:
