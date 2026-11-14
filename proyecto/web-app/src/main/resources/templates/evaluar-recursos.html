@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluar recursos</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div class="layout-single">
+    <section class="panel">
+        <h1>Evaluar recursos</h1>
+        <p>Selecciona al menos un recurso para completar la tarea. El motor activara las
+            ramas correspondientes a cada opcion marcada.</p>
+
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <form class="recursos"
+              th:action="@{/administrativos/recursos/{id}(id=${taskId})}"
+              th:object="${recursosForm}" method="post">
+            <fieldset>
+                <legend>Recursos disponibles</legend>
+
+                <label class="opcion-recurso" for="aulaFisica">
+                    <input type="checkbox" id="aulaFisica" th:field="*{aulaFisica}">
+                    Aula fisica
+                </label>
+
+                <label class="opcion-recurso" for="aulaVirtual">
+                    <input type="checkbox" id="aulaVirtual" th:field="*{aulaVirtual}">
+                    Aula virtual
+                </label>
+
+                <label class="opcion-recurso" for="equipamientoEspecial">
+                    <input type="checkbox" id="equipamientoEspecial" th:field="*{equipamientoEspecial}">
+                    Equipamiento especial
+                </label>
+            </fieldset>
+
+            <button type="submit" id="btn-completar" disabled>Completar</button>
+            <a class="enlace-volver" th:href="@{/administrativos}">Volver a mis tareas</a>
+        </form>
+    </section>
+</div>
+
+<script>
+    const casillas = document.querySelectorAll('form.recursos input[type="checkbox"]');
+    const botonCompletar = document.getElementById('btn-completar');
+
+    function actualizarBoton() {
+        botonCompletar.disabled = !Array.from(casillas).some(function (casilla) {
+            return casilla.checked;
+        });
+    }
+
+    casillas.forEach(function (casilla) {
+        casilla.addEventListener('change', actualizarBoton);
+    });
+    actualizarBoton();
+</script>
+</body>
+</html>

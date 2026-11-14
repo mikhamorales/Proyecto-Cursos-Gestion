@@ -186,7 +186,6 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       </userTask>
     <userTask id="sid-E0F8C31B-8D21-4CBC-A2A7-C7213EA7FBFB" name="Preparar materiales" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
       <extensionElements>
-        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
         <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
@@ -197,7 +196,6 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       <parallelGateway id="sid-CF1955EC-B385-48C5-8E83-88EA58EEC24E" name="Preparacion completa"></parallelGateway>
     <userTask id="sid-FC42B03B-500A-4344-A46D-C18448C77F0D" name="Evaluar recursos" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
       <extensionElements>
-        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
         <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
@@ -226,7 +224,6 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       </scriptTask>
     <userTask id="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" name="Solicitar aula virtual" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
       <extensionElements>
-        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
         <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
@@ -247,7 +244,6 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       </scriptTask>
     <userTask id="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" name="Contratar equipamiento" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
       <extensionElements>
-        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
         <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
@@ -261,7 +257,6 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       </boundaryEvent>
     <userTask id="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8" name="Liberar equipamiento" isForCompensation="true" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
       <extensionElements>
-        <flowable:taskListener event="create" class="flowable.listeners.AsignarTarea"></flowable:taskListener>
         <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
@@ -293,11 +288,17 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       <sequenceFlow id="sid-6F6E7B73-B2FE-4FC7-9F70-C6D7324D34AC" sourceRef="sid-6443AE13-2ACF-4CC6-AE8A-F6ADACC2DFC4" targetRef="sid-CF1955EC-B385-48C5-8E83-88EA58EEC24E"></sequenceFlow>
       <sequenceFlow id="sid-79CAD175-AC87-4F8A-A73C-AD6EE0474DE0" sourceRef="sid-FA59CF98-BCF7-4569-A745-EB39F0C2C26B" targetRef="sid-FC42B03B-500A-4344-A46D-C18448C77F0D"></sequenceFlow>
       <sequenceFlow id="sid-FDF4BF48-842E-4EC9-B0C4-70C261889E86" sourceRef="sid-FC42B03B-500A-4344-A46D-C18448C77F0D" targetRef="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846"></sequenceFlow>
-      <sequenceFlow id="sid-80FC4D55-D710-483D-9913-BF37CEF20702" sourceRef="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846" targetRef="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D"></sequenceFlow>
+      <sequenceFlow id="sid-80FC4D55-D710-483D-9913-BF37CEF20702" sourceRef="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846" targetRef="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${aulaFisica == true}]]></conditionExpression>
+      </sequenceFlow>
       <sequenceFlow id="sid-F57FCDFB-92B1-44C2-B062-F0EF77A8A1FB" sourceRef="sid-8809100B-A6B1-4472-A02F-8273B4CD527A" targetRef="sid-C5D62DD3-223B-479A-9F46-D3BCD2AC2E90"></sequenceFlow>
-      <sequenceFlow id="sid-B7E33BE6-CFB5-49D2-9807-29860C3A179C" sourceRef="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846" targetRef="sid-9DFA5D35-197B-4160-A846-715EE6B3E651"></sequenceFlow>
+      <sequenceFlow id="sid-B7E33BE6-CFB5-49D2-9807-29860C3A179C" sourceRef="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846" targetRef="sid-9DFA5D35-197B-4160-A846-715EE6B3E651">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${aulaVirtual == true}]]></conditionExpression>
+      </sequenceFlow>
       <sequenceFlow id="sid-878B11B0-1DDB-463A-9B19-52AE73CB68E3" sourceRef="sid-C925B450-2C19-455D-AB88-8A1337014BFE" targetRef="sid-CA860AD7-83F9-4734-A709-41F01D88805C"></sequenceFlow>
-      <sequenceFlow id="sid-97872055-AEFE-45E5-9A5C-70D9CFD27E75" sourceRef="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846" targetRef="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE"></sequenceFlow>
+      <sequenceFlow id="sid-97872055-AEFE-45E5-9A5C-70D9CFD27E75" sourceRef="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846" targetRef="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${equipamientoEspecial == true}]]></conditionExpression>
+      </sequenceFlow>
       <sequenceFlow id="sid-BF0CFD2B-2129-4E51-A2A1-2322AFEFB211" sourceRef="sid-A5E9DA16-D099-439B-B683-ED017EACD460" targetRef="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8"></sequenceFlow>
       <sequenceFlow id="sid-2E29AA84-9717-4E8E-9C49-70B606069F4B" sourceRef="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" targetRef="sid-E3A32C56-8536-4526-A638-448A00454329"></sequenceFlow>
       <sequenceFlow id="sid-9B40F297-84A2-4998-BEBA-CF8A8A9A2CFD" sourceRef="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D" targetRef="sid-E3A32C56-8536-4526-A638-448A00454329"></sequenceFlow>

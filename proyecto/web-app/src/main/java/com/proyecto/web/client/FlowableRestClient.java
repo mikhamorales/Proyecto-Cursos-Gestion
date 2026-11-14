@@ -5,6 +5,8 @@ import com.proyecto.web.model.FlowableListResponse;
 import com.proyecto.web.model.MessageEventRequest;
 import com.proyecto.web.model.ProcessVariable;
 import com.proyecto.web.model.StartProcessRequest;
+import com.proyecto.web.model.Tarea;
+import com.proyecto.web.model.TaskActionRequest;
 import com.proyecto.web.model.VariableRequest;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -151,6 +153,102 @@ public class FlowableRestClient {
         } catch (RestClientResponseException e) {
             throw new FlowableUnavailableException(
                     "Flowable rechazo el mensaje (HTTP " + e.getStatusCode().value() + ").", e);
+        } catch (ResourceAccessException e) {
+            throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
+        }
+    }
+
+    /**
+     * Lista las tareas asignadas directamente al usuario, usando sus propias
+     * credenciales contra la API de proceso.
+     */
+    public List<Tarea> listarTareasAsignadas(String usuario, String clave) {
+        return listarTareas("/runtime/tasks?assignee={usuario}", usuario, clave, "asignadas");
+    }
+
+    /**
+     * Lista las tareas de las que el usuario es candidato (directo o por grupo).
+     * Incluye tareas sin asignar y tareas que puede tomar su grupo.
+     */
+    public List<Tarea> listarTareasCandidatas(String usuario, String clave) {
+        return listarTareas("/runtime/tasks?candidateUser={usuario}", usuario, clave, "del grupo");
+    }
+
+    /**
+     * Obtiene una tarea puntual con las credenciales del empleado logueado.
+     */
+    public Tarea obtenerTarea(String taskId, String usuario, String clave) {
+        try {
+            Tarea tarea = processClient.get()
+                    .uri("/runtime/tasks/{id}", taskId)
+                    .headers(headers -> headers.setBasicAuth(usuario, clave))
+                    .retrieve()
+                    .body(Tarea.class);
+            if (tarea == null) {
+                throw new FlowableUnavailableException("Flowable no devolvio la tarea solicitada.");
+            }
+            return tarea;
+        } catch (RestClientResponseException e) {
+            throw new FlowableUnavailableException(
+                    "Flowable rechazo la consulta de la tarea (HTTP "
+                            + e.getStatusCode().value() + ").", e);
+        } catch (ResourceAccessException e) {
+            throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
+        }
+    }
+
+    /**
+     * Reclama una tarea de grupo para el usuario logueado.
+     */
+    public void reclamarTarea(String taskId, String usuario, String clave) {
+        ejecutarAccionTarea(taskId, new TaskActionRequest("claim", usuario, null),
+                usuario, clave, "reclamar");
+    }
+
+    /**
+     * Completa una tarea enviando las variables indicadas (puede ser vacio).
+     */
+    public void completarTarea(String taskId, List<VariableRequest> variables,
+            String usuario, String clave) {
+        ejecutarAccionTarea(taskId, new TaskActionRequest("complete", null, variables),
+                usuario, clave, "completar");
+    }
+
+    private List<Tarea> listarTareas(String uri, String usuario, String clave, String descripcion) {
+        try {
+            FlowableListResponse<Tarea> response = processClient.get()
+                    .uri(uri, usuario)
+                    .headers(headers -> headers.setBasicAuth(usuario, clave))
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<FlowableListResponse<Tarea>>() {
+                    });
+            if (response == null || response.data() == null) {
+                return List.of();
+            }
+            return response.data();
+        } catch (RestClientResponseException e) {
+            throw new FlowableUnavailableException(
+                    "Flowable rechazo la consulta de tareas " + descripcion + " (HTTP "
+                            + e.getStatusCode().value() + ").", e);
+        } catch (ResourceAccessException e) {
+            throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
+        }
+    }
+
+    private void ejecutarAccionTarea(String taskId, TaskActionRequest request,
+            String usuario, String clave, String accion) {
+        try {
+            processClient.post()
+                    .uri("/runtime/tasks/{id}", taskId)
+                    .headers(headers -> headers.setBasicAuth(usuario, clave))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(request)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (RestClientResponseException e) {
+            throw new FlowableUnavailableException(
+                    "Flowable rechazo la accion de " + accion + " la tarea (HTTP "
+                            + e.getStatusCode().value() + ").", e);
         } catch (ResourceAccessException e) {
             throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
         }

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tareas administrativas</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div class="layout-single">
+    <section class="panel">
+        <h1>Bienvenido, <span th:text="${usuario}">usuario</span></h1>
+        <p th:if="${esJefe}">Rol: jefe administrativo.</p>
+
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <form th:action="@{/logout}" method="post">
+            <button type="submit">Cerrar sesion</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h1>Mis tareas</h1>
+        <p th:if="${#lists.isEmpty(tareas.?[propia])}">No tenes tareas asignadas.</p>
+
+        <table class="tabla-tareas" th:unless="${#lists.isEmpty(tareas.?[propia])}">
+            <thead>
+            <tr>
+                <th>Tarea</th>
+                <th>Instancia</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="tarea : ${tareas.?[propia]}">
+                <td th:text="${tarea.nombre}"></td>
+                <td th:text="${#strings.abbreviate(tarea.processInstanceId, 12)}"></td>
+                <td>
+                    <form th:action="@{/administrativos/completar}" method="post">
+                        <input type="hidden" name="taskId" th:value="${tarea.id}">
+                        <button type="submit" class="btn-tarea btn-completar">Completar</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h1>Tareas del grupo</h1>
+        <p th:if="${#lists.isEmpty(tareas.?[reclamable])}">
+            No hay tareas disponibles para reclamar.
+        </p>
+
+        <table class="tabla-tareas" th:unless="${#lists.isEmpty(tareas.?[reclamable])}">
+            <thead>
+            <tr>
+                <th>Tarea</th>
+                <th>Instancia</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="tarea : ${tareas.?[reclamable]}">
+                <td th:text="${tarea.nombre}"></td>
+                <td th:text="${#strings.abbreviate(tarea.processInstanceId, 12)}"></td>
+                <td>
+                    <form th:action="@{/administrativos/reclamar}" method="post">
+                        <input type="hidden" name="taskId" th:value="${tarea.id}">
+                        <button type="submit" class="btn-tarea btn-reclamar">Reclamar</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</div>
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.proyecto.web.controller;
 
 import com.proyecto.web.client.FlowableRestClient;
 import com.proyecto.web.service.AuthService;
+import com.proyecto.web.service.RolService;
 import com.proyecto.web.service.SimulacionService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,12 +20,15 @@ public class LoginController {
 
     private final AuthService authService;
     private final SimulacionService simulacionService;
+    private final RolService rolService;
     private final String adminUsername;
 
     public LoginController(AuthService authService, SimulacionService simulacionService,
+            RolService rolService,
             @Value("${flowable.admin.username:admin}") String adminUsername) {
         this.authService = authService;
         this.simulacionService = simulacionService;
+        this.rolService = rolService;
         this.adminUsername = adminUsername;
     }
 
@@ -37,7 +41,10 @@ public class LoginController {
                 // Se conserva la clave para autenticar las proximas llamadas al motor
                 // con las credenciales del empleado logueado (proyecto academico).
                 session.setAttribute("password", password);
-                return "redirect:/empleados";
+                String destino = adminUsername.equals(usuario) ? "/empleados"
+                        : rolService.esAdministrativo(usuario) ? "/administrativos"
+                        : "/empleados";
+                return "redirect:" + destino;
             }
             redirectAttributes.addFlashAttribute("loginError", "Usuario o contrasena incorrectos");
             return "redirect:/";

@@ -27,6 +27,8 @@ La pantalla principal (`/`) tiene dos paneles:
 | `flowable.rest.password` | `test` | Clave de la API REST |
 | `flowable.process-definition-key` | `process` | Clave del proceso BPMN que inicia el formulario |
 | `flowable.admin.username` | `admin` | Usuario que ve el panel de simulación de mensajes en `/empleados` |
+| `flowable.rol.jefe-administrativo` | `jefeAdmin` | Usuario con rol de jefe administrativo |
+| `flowable.rol.administrativos` | `admin1,admin2` | Usuarios con rol administrativo (separados por coma) |
 
 Ajustá URL, puerto y credenciales a lo que use el `docker-compose.yml` del equipo.
 
@@ -79,7 +81,7 @@ Al enviar:
 
 - Ingresá un usuario y contraseña válidos de Flowable (por ejemplo, `admin` / `test`).
 - Se valida con `GET {flowable.rest.ui-base-url}/idm/users/{usuario}` usando autenticación básica.
-- Credenciales correctas (HTTP 200): redirige a `/empleados`, que muestra el usuario y un botón para cerrar sesión.
+- Credenciales correctas (HTTP 200): redirige según el usuario. El usuario de `flowable.admin.username` va a `/empleados` (panel de simulación); `jefeAdmin`, `admin1` y `admin2` van a `/administrativos`; cualquier otro usuario va a `/empleados`.
 - Credenciales incorrectas (HTTP 401/403): muestra "Usuario o contraseña incorrectos" en el panel.
 - Flowable apagado: muestra un mensaje amigable, sin stacktrace.
 
@@ -100,6 +102,57 @@ El envío hace `PUT /runtime/executions/{executionId}` con `{"action":"messageEv
 
 > El panel necesita que el BPMN (con los `messageEventDefinition`) y el DMN `viabilidad` estén desplegados en el motor. Los archivos viven en `proyecto/shared/src/resources/` y se despliegan a mano; no se empaquetan en el jar de `shared`.
 
+### Pantallas de administración (`/administrativos`)
+
+Disponibles para los usuarios con rol administrativo: `jefeAdmin` (jefe administrativo) y `admin1` / `admin2` (administrativos). El rol se determina por el nombre de usuario; no se usan grupos de Flowable. La sesión guarda el usuario y la contraseña, y **todas** las llamadas de tareas usan esas credenciales (no la cuenta de servicio `admin`).
+
+La pantalla muestra dos secciones:
+
+| Sección | Contenido | Botón |
+|---|---|---|
+| Mis tareas | Tareas asignadas directamente al usuario (`assignee`) | **Completar** |
+| Tareas del grupo | Tareas sin asignar disponibles para el grupo (`candidateUser`) | **Reclamar** |
+
+- **Reclamar** hace `POST /runtime/tasks/{id}` con `{"action":"claim","assignee":"<usuario>"}`. Solo aparece en tareas del grupo.
+- **Completar** hace `POST /runtime/tasks/{id}` con `{"action":"complete","variables":[...]}`. En las tareas comunes no envía variables.
+- Si Flowable no responde, se muestra un mensaje amigable y se vuelve al listado, sin stacktrace.
+
+Tareas administrativas soportadas: "Archivar solicitud" (jefe administrativo), "Confeccionar lista definitiva", "Evaluar recursos" y "Enviar informe a la empresa y archivar expediente" (jefe administrativo). Las tareas asignadas directamente no se pueden reclamar.
+
+#### Evaluar recursos
+
+Al presionar **Completar** en la tarea "Evaluar recursos", se abre `/administrativos/recursos/{taskId}`, con tres casillas: **Aula física**, **Aula virtual** y **Equipamiento especial**.
+
+- El botón **Completar** queda deshabilitado hasta marcar al menos una opción (JavaScript en la página).
+- El servidor vuelve a validar; si no hay ninguna marcada, muestra "Selecciona al menos un recurso." y no llama al motor.
+- Al completar, envía las variables booleanas `aulaFisica`, `aulaVirtual` y `equipamientoEspecial`. El gateway inclusivo del proceso activa las ramas correspondientes.
+
+#### Cómo probarlo
+
+1. Con el motor y el proceso desplegados, iniciá sesión con `jefeAdmin` / `jefeAdmin`, `admin1` / `admin1` o `admin2` / `admin2` (usuarios de prueba del motor).
+2. El login redirige a `/administrativos`. La sección **Tareas del grupo** debe mostrar las tareas sin asignar; **Mis tareas**, las asignadas al usuario.
+3. Reclamá una tarea de grupo y verificá que se mueva a **Mis tareas** (el estado también se refleja en la UI de Flowable).
+4. Completá una tarea común y confirmá que desaparece. Para "Evaluar recursos", comprobá que el botón arranca deshabilitado y que solo se habilita al marcar una opción.
+5. Cerrá sesión con el botón **Cerrar sesión** (`POST /logout`).
+
+> Las tareas "Solicitar aula virtual", "Contratar equipamiento", "Liberar equipamiento" y "Elaborar informe de resultados" se realizan desde la UI de Flowable; este sitio no las implementa. "Enviar informe a la empresa y archivar expediente" por ahora solo permite completar la tarea (sin contenido de informe).
+
+## Cambios en el BPMN (issue3)
+
+Para que las pantallas de administración funcionen hubo que ajustar el modelo. El archivo vive en `proyecto/shared/src/resources/Institucion_de_capacitacion.bpmn20.xml` y se despliega a mano al motor (no se empaqueta en el jar de `shared`).
+
+- **Tareas de grupo reclamables**: el `taskListener` `AsignarTarea` (que asigna por round-robin) quedó **solo** en "Confeccionar lista definitiva". Antes estaba en las 6 tareas de administración y las preasignaba, así que nunca aparecían en **Tareas del grupo** para reclamar.
+- **Ramas condicionales de recursos**: el gateway inclusivo que sigue a "Evaluar recursos" ahora tiene tres `conditionExpression` (`${aulaFisica == true}`, `${aulaVirtual == true}`, `${equipamientoEspecial == true}`). Así solo se activan las ramas de los recursos marcados; sin condiciones, el gateway activaba las tres siempre.
+- El proceso quedó desplegado como `process:4` (`process:4:47a392b3-dfb6-11f1-8fb8-223850ed8974`).
+
+> `AsignarTarea` sigue funcionando en "Confeccionar lista definitiva": al crearse la tarea se asigna a un administrativo.
+
+## Pendiente conocido (futura issue)
+
+Al completar cualquier tarea que tenga un **boundary event de compensación** ("Reservar aula", "Solicitar aula virtual", "Contratar equipamiento"), el motor responde 500 con `Parent activity for boundary compensation event could not be found`. Causa: esos boundary events están cableados a sus handlers ("Liberar aula", "Liberar aula virtual", "Liberar equipamiento") con `<sequenceFlow>` en vez de `<association>`, y Flowable resuelve el handler buscando **associations** (no hay ninguna en el archivo). Es **preexistente** —la versión `v3` falla igual— y quedó fuera del alcance de issue3.
+
+Fix probado pero **no aplicado**: agregar 3 `<association associationDirection="One" sourceRef="<boundaryEvent>" targetRef="<handler>">`, borrar los 3 `<sequenceFlow>` que hoy van del boundary al handler y quitarles `cancelActivity="false"`. Con eso "Solicitar aula virtual" completa 200 y el proceso avanza. Conviene revisar también el camino de cancelación (`MCancelacion`), que dispara compensación.
+
 ## Estructura de carpetas
 
 ```
@@ -113,12 +166,13 @@ web-app/
     ├── main/
     │   ├── java/com/proyecto/web/
     │   │   ├── WebApplication.java
-    │   │   ├── controller/        # SolicitudController, LoginController
-    │   │   ├── service/           # SolicitudService, AuthService, SimulacionService
+    │   │   ├── controller/        # SolicitudController, LoginController, AdministrativoController
+    │   │   ├── service/           # SolicitudService, AuthService, SimulacionService, RolService, TareaService
     │   │   ├── client/            # FlowableRestClient
     │   │   ├── model/             # SolicitudForm, VariableRequest, StartProcessRequest,
     │   │   │                      # EventSubscription, ProcessVariable, MessageEventRequest,
-    │   │   │                      # AccionSimulable, InstanciaSimulable, FlowableListResponse
+    │   │   │                      # AccionSimulable, InstanciaSimulable, FlowableListResponse,
+    │   │   │                      # Tarea, TareaVista, RecursosForm, TaskActionRequest
     │   │   └── config/            # FlowableRestConfig
     │   └── resources/
     │       ├── application.properties
@@ -127,7 +181,9 @@ web-app/
     │       │   └── js/
     │       └── templates/
     │           ├── index.html
-    │           └── empleados.html
+    │           ├── empleados.html
+    │           ├── administrativos.html
+    │           └── evaluar-recursos.html
     └── test/java/com/proyecto/web/
         └── WebApplicationTests.java
 ```

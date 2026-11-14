@@ -160,3 +160,76 @@ button:hover {
 .btn-simulacion-peligro:hover {
     background: #b91c1c;
 }
+
+.tabla-tareas {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.tabla-tareas th,
+.tabla-tareas td {
+    border: 1px solid #e4e7eb;
+    padding: 0.5rem 0.6rem;
+    text-align: left;
+    font-size: 0.9rem;
+    vertical-align: top;
+}
+
+.tabla-tareas th {
+    background: #f4f6f8;
+}
+
+.btn-tarea {
+    margin-top: 0;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.btn-completar {
+    background: #16a34a;
+}
+
+.btn-completar:hover {
+    background: #15803d;
+}
+
+.btn-reclamar {
+    background: #f59e0b;
+    color: #1f2933;
+}
+
+.btn-reclamar:hover {
+    background: #d97706;
+}
+
+.opcion-recurso {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.opcion-recurso input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+button:disabled {
+    background: #9aa5b1;
+    cursor: not-allowed;
+}
+
+button:disabled:hover {
+    background: #9aa5b1;
+}
+
+.enlace-volver {
+    display: inline-block;
+    margin-top: 1rem;
+    margin-left: 1rem;
+    color: #2563eb;
+    font-size: 0.9rem;
+}
+
