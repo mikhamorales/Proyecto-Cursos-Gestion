@@ -1,0 +1,70 @@
+# =====================================================================
+# Entorno local del proyecto: PostgreSQL + Flowable UI
+#
+#   docker compose up -d          # levanta la base y el motor
+#   docker compose ps             # estado de los contenedores
+#   docker compose logs -f        # logs
+#   docker compose down           # apaga (conserva los datos)
+#   docker compose down -v        # apaga y borra el volumen de Postgres
+#
+# La base "institucion" NO la crea este compose: se carga a mano con
+# proyecto/shared/Database.sql (ver proyecto/web-app/README.md).
+# =====================================================================
+
+services:
+  # -------------------------------------------------------------------
+  # PostgreSQL. El nombre del servicio es "postgres" a propósito: es el
+  # hostname que usan los listeners del motor
+  # (jdbc:postgresql://postgres:5432/institucion) dentro de la red Docker.
+  # -------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: flowable-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-flowable}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-flow123}
+      POSTGRES_DB: ${POSTGRES_DB:-flowable}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - flowable-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-flowable}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # -------------------------------------------------------------------
+  # Flowable UI (IDM + Modeler + Task + Admin + Process/REST API).
+  # Expone http://localhost:8080/flowable-ui
+  # Usa el mismo PostgreSQL (base "flowable") para su propio esquema.
+  # -------------------------------------------------------------------
+  flowable-ui:
+    image: flowable/flowable-ui:latest
+    container_name: flowable-ui
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: org.postgresql.Driver
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-flowable}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-flowable}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-flow123}
+      FLOWABLE_COMMON_APP_IDM-ADMIN_USER: ${FLOWABLE_ADMIN_USER:-admin}
+      FLOWABLE_COMMON_APP_IDM-ADMIN_PASSWORD: ${FLOWABLE_ADMIN_PASSWORD:-test}
+    ports:
+      - "8080:8080"
+    networks:
+      - flowable-net
+
+volumes:
+  postgres-data:
+
+networks:
+  flowable-net:
+    name: flowable-net
