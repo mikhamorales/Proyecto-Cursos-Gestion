@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Admin App - Gestion de Cursos</title>
+	<link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+	<header class="barra">
+		<h1>Panel de Administracion</h1>
+		<div class="sesion">
+			<span th:text="${usuario}">admin1</span>
+			<form method="post" th:action="@{/logout}">
+				<button type="submit" class="secundario">Salir</button>
+			</form>
+		</div>
+	</header>
+
+	<main>
+		<div class="alerta error" th:if="${error}" th:text="${error}"></div>
+		<div class="alerta ok" th:if="${mensaje}" th:text="${mensaje}"></div>
+
+		<section>
+			<h2>Tareas asignadas a mi</h2>
+			<p class="vacio" th:if="${#lists.isEmpty(asignadas)}">
+				No tenes tareas de "Preparar materiales" asignadas.
+			</p>
+			<table th:unless="${#lists.isEmpty(asignadas)}">
+				<thead>
+					<tr>
+						<th>Tarea</th>
+						<th>Creada</th>
+						<th>Asignada a</th>
+						<th>Accion</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="t : ${asignadas}">
+						<td th:text="${t.nombre}">Preparar materiales</td>
+						<td th:text="${t.fechaCreacion}">01/01/2026 10:00</td>
+						<td th:text="${t.asignadoA}">admin1</td>
+						<td>
+							<form method="post" th:action="@{/tareas/{id}/completar(id=${t.id})}">
+								<button type="submit" class="primario">Completar</button>
+							</form>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>Tareas de mi grupo sin reclamar</h2>
+			<p class="vacio" th:if="${#lists.isEmpty(reclamables)}">
+				No hay tareas de "Preparar materiales" para reclamar.
+			</p>
+			<table th:unless="${#lists.isEmpty(reclamables)}">
+				<thead>
+					<tr>
+						<th>Tarea</th>
+						<th>Creada</th>
+						<th>Accion</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="t : ${reclamables}">
+						<td th:text="${t.nombre}">Preparar materiales</td>
+						<td th:text="${t.fechaCreacion}">01/01/2026 10:00</td>
+						<td>
+							<form method="post" th:action="@{/tareas/{id}/reclamar(id=${t.id})}">
+								<button type="submit" class="secundario">Reclamar</button>
+							</form>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+	</main>
+</body>
+</html>

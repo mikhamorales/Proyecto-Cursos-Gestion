@@ -28,6 +28,7 @@ replay_pid*
 
 # Maven build output
 proyecto/target/
+proyecto/*/target/
 
 openspec/
 
