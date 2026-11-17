@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Definir docente</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div class="layout-single">
+    <section class="panel">
+        <h1>Definir docente</h1>
+        <p>Selecciona el docente que desarrollara el curso. Podes elegirte a vos mismo.</p>
+
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <p th:if="${tarea != null}">
+            <strong>Tarea:</strong> <span th:text="${tarea.name}">Definir docente</span><br>
+            <strong>Instancia:</strong>
+            <span th:text="${#strings.abbreviate(tarea.processInstanceId, 12)}">instancia</span>
+        </p>
+
+        <form th:action="@{/docentes/asignar/{id}(id=${taskId})}" method="post">
+            <fieldset>
+                <legend>Docentes disponibles</legend>
+
+                <p th:if="${#lists.isEmpty(docentes)}">No hay docentes configurados.</p>
+
+                <label class="opcion-recurso" th:each="docente : ${docentes}">
+                    <input type="radio" name="docente" th:value="${docente}" required>
+                    <span th:text="${docente}">docente</span>
+                </label>
+            </fieldset>
+
+            <button type="submit" th:disabled="${#lists.isEmpty(docentes)}">Asignar y completar</button>
+            <a class="enlace-volver" th:href="@{/docentes}">Volver a mis tareas</a>
+        </form>
+    </section>
+</div>
+</body>
+</html>

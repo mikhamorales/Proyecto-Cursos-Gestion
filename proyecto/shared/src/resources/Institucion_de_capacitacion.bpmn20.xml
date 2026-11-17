@@ -8,7 +8,6 @@
   <message id="msgAprobacion" name="Aprobacion"></message>
   <message id="msgRechazo" name="Rechazo"></message>
   <message id="msgModificacion" name="Modificacion"></message>
-  <error id="cancelacionError" errorCode="CANCELACION"></error>
   <process id="process" name="Institucion de capacitacion" isExecutable="true">
     <extensionElements>
       <flowable:executionListener event="end" class="flowable.listeners.ActualizarEstado"></flowable:executionListener>
@@ -193,9 +192,9 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         </extensionElements>
       </userTask>
       <parallelGateway id="sid-CF1955EC-B385-48C5-8E83-88EA58EEC24E" name="Preparacion completa"></parallelGateway>
-    <userTask id="sid-FC42B03B-500A-4344-A46D-C18448C77F0D" name="Evaluar recursos" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
-      <extensionElements>
-        <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
+      <userTask id="sid-FC42B03B-500A-4344-A46D-C18448C77F0D" name="Evaluar recursos" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+        <extensionElements>
+          <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
@@ -219,9 +218,9 @@ execution.setVariable('accesoHabilitado', true)]]></script>
           <flowable:executionListener event="end" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
         </extensionElements>
       </serviceTask>
-    <userTask id="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" name="Solicitar aula virtual" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
-      <extensionElements>
-        <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
+      <userTask id="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" name="Solicitar aula virtual" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+        <extensionElements>
+          <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
@@ -238,9 +237,9 @@ execution.setVariable('accesoHabilitado', true)]]></script>
           <flowable:executionListener event="end" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
         </extensionElements>
       </serviceTask>
-    <userTask id="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" name="Contratar equipamiento" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
-      <extensionElements>
-        <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
+      <userTask id="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" name="Contratar equipamiento" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+        <extensionElements>
+          <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
@@ -251,9 +250,9 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       <boundaryEvent id="sid-A5E9DA16-D099-439B-B683-ED017EACD460" attachedToRef="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" cancelActivity="false">
         <compensateEventDefinition></compensateEventDefinition>
       </boundaryEvent>
-    <userTask id="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8" name="Liberar equipamiento" isForCompensation="true" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
-      <extensionElements>
-        <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
+      <userTask id="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8" name="Liberar equipamiento" isForCompensation="true" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
+        <extensionElements>
+          <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
           <modeler:group-info-name-administracion xmlns:modeler="http://flowable.org/modeler"><![CDATA[Administracion]]></modeler:group-info-name-administracion>
@@ -372,13 +371,11 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         <timeDuration>PT2M</timeDuration>
       </timerEventDefinition>
     </intermediateCatchEvent>
-    <userTask id="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2" name="Desarrollar curso" flowable:candidateGroups="docentes" flowable:formFieldValidation="true">
+    <userTask id="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2" name="Desarrollar curso" flowable:assignee="&quot;${docenteSeleccionado}&quot;" flowable:formFieldValidation="true">
       <extensionElements>
         <flowable:taskListener event="create" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
         <flowable:taskListener event="complete" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
         <flowable:taskListener event="assignment" class="flowable.listeners.ListenerGenerico"></flowable:taskListener>
-        <modeler:group-info-name-docentes xmlns:modeler="http://flowable.org/modeler"><![CDATA[Docentes]]></modeler:group-info-name-docentes>
-        <modeler:activiti-idm-candidate-group xmlns:modeler="http://flowable.org/modeler"><![CDATA[true]]></modeler:activiti-idm-candidate-group>
         <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
       </extensionElements>
     </userTask>
@@ -423,10 +420,6 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${viable == false}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="sid-6FDB76A3-340A-42A2-80BC-55C997761168" sourceRef="mAceptacion" targetRef="sid-E7B32F63-5E82-49E2-93EB-CDA41E899BD0"></sequenceFlow>
-    <sequenceFlow id="sid-A41C11DD-DDE7-4F88-BF53-083AE5B07F40" sourceRef="sid-D9626FE6-AE69-44AF-9389-E320BC348EDB" targetRef="sid-0E1EA514-6D29-40B5-BFF9-3CF74DF444AD"></sequenceFlow>
-    <sequenceFlow id="sid-9CF578F1-D4AB-4D87-AC23-32CC6E2C2C9F" sourceRef="sid-0E1EA514-6D29-40B5-BFF9-3CF74DF444AD" targetRef="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2"></sequenceFlow>
-    <sequenceFlow id="sid-88FC4336-3B80-491C-B1FB-D453722A3263" sourceRef="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2" targetRef="sid-EDDAC05F-B007-4E01-8223-713A621E1188"></sequenceFlow>
-    <sequenceFlow id="sid-D3367576-C647-4408-9F27-2B7A15BEA589" sourceRef="sid-EDDAC05F-B007-4E01-8223-713A621E1188" targetRef="sid-B6D61931-87C0-4758-AAA9-6546C5AF7F92"></sequenceFlow>
     <sequenceFlow id="sid-7E92B91B-BEE9-4379-BAD9-BE2D50014E79" name="No" sourceRef="sid-9BA9209A-DF82-42F9-B3D9-75D55783CDCA" targetRef="sid-C3EA7F9D-32C3-4005-8B6C-8B0DB1734169">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${recordatorios < 2}]]></conditionExpression>
     </sequenceFlow>
@@ -436,6 +429,10 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       </extensionElements>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${recordatorios >= 2}]]></conditionExpression>
     </sequenceFlow>
+    <sequenceFlow id="sid-A41C11DD-DDE7-4F88-BF53-083AE5B07F40" sourceRef="sid-D9626FE6-AE69-44AF-9389-E320BC348EDB" targetRef="sid-0E1EA514-6D29-40B5-BFF9-3CF74DF444AD"></sequenceFlow>
+    <sequenceFlow id="sid-9CF578F1-D4AB-4D87-AC23-32CC6E2C2C9F" sourceRef="sid-0E1EA514-6D29-40B5-BFF9-3CF74DF444AD" targetRef="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2"></sequenceFlow>
+    <sequenceFlow id="sid-88FC4336-3B80-491C-B1FB-D453722A3263" sourceRef="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2" targetRef="sid-EDDAC05F-B007-4E01-8223-713A621E1188"></sequenceFlow>
+    <sequenceFlow id="sid-D3367576-C647-4408-9F27-2B7A15BEA589" sourceRef="sid-EDDAC05F-B007-4E01-8223-713A621E1188" targetRef="sid-B6D61931-87C0-4758-AAA9-6546C5AF7F92"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration">
     <bpmndi:BPMNPlane bpmnElement="Collaboration" id="BPMNPlane_Collaboration">
@@ -512,7 +509,7 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         <omgdc:Bounds height="80.0" width="100.0" x="884.9999787658458" y="389.999988600612"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sid-E0F8C31B-8D21-4CBC-A2A7-C7213EA7FBFB" id="BPMNShape_sid-E0F8C31B-8D21-4CBC-A2A7-C7213EA7FBFB">
-        <omgdc:Bounds height="79.99999999999994" width="100.0" x="764.9999886006118" y="479.99999284744274"></omgdc:Bounds>
+        <omgdc:Bounds height="79.99999999999994" width="100.0" x="764.9999772012238" y="479.9999856948856"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sid-CF1955EC-B385-48C5-8E83-88EA58EEC24E" id="BPMNShape_sid-CF1955EC-B385-48C5-8E83-88EA58EEC24E">
         <omgdc:Bounds height="40.0" width="40.0" x="1169.1756390725288" y="525.5200485541541"></omgdc:Bounds>
@@ -628,7 +625,7 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         <omgdi:waypoint x="1254.1756390725288" y="545.5200485541541"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-CD7A23D7-D4A2-4174-930B-47B69E257E61" id="BPMNEdge_sid-CD7A23D7-D4A2-4174-930B-47B69E257E61" flowable:sourceDockerX="50.0" flowable:sourceDockerY="39.99999999999997" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
-        <omgdi:waypoint x="864.9499886006116" y="525.6249941679322"></omgdi:waypoint>
+        <omgdi:waypoint x="864.9499772012234" y="525.6249883358644"></omgdi:waypoint>
         <omgdi:waypoint x="1037.0" y="545.0"></omgdi:waypoint>
         <omgdi:waypoint x="1169.2006279424143" y="545.4519328709627"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
@@ -673,10 +670,10 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         <omgdi:waypoint x="1129.2313517755124" y="843.1098269857648"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-EA830E49-B904-4DD6-95CC-6EB60588A2D9" id="BPMNEdge_sid-EA830E49-B904-4DD6-95CC-6EB60588A2D9" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="39.99999999999997">
-        <omgdi:waypoint x="648.3054629708496" y="540.6064886299268"></omgdi:waypoint>
-        <omgdi:waypoint x="714.1835354032874" y="540.6064929188187"></omgdi:waypoint>
-        <omgdi:waypoint x="714.1835354032874" y="519.9999928474427"></omgdi:waypoint>
-        <omgdi:waypoint x="764.9999886006118" y="519.9999928474427"></omgdi:waypoint>
+        <omgdi:waypoint x="648.1767740046677" y="540.4658353226772"></omgdi:waypoint>
+        <omgdi:waypoint x="714.0" y="540.0"></omgdi:waypoint>
+        <omgdi:waypoint x="714.0" y="519.9999856948856"></omgdi:waypoint>
+        <omgdi:waypoint x="764.9999772012238" y="519.9999856948856"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-BF0CFD2B-2129-4E51-A2A1-2322AFEFB211" id="BPMNEdge_sid-BF0CFD2B-2129-4E51-A2A1-2322AFEFB211" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.000000000000028" flowable:targetDockerX="50.0" flowable:targetDockerY="40.00000000000003">
         <omgdi:waypoint x="922.5456350321807" y="1033.059042429337"></omgdi:waypoint>
@@ -728,15 +725,15 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         <omgdi:waypoint x="93.09999912939966" y="239.99999642372137"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-06B8D6F0-D2D6-4C8D-96A0-FE8AF75F6692" id="BPMNEdge_sid-06B8D6F0-D2D6-4C8D-96A0-FE8AF75F6692" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
-        <omgdi:waypoint x="699.9499828489277" y="444.99999033581287"></omgdi:waypoint>
-        <omgdi:waypoint x="792.499988935888" y="444.99999396502983"></omgdi:waypoint>
-        <omgdi:waypoint x="792.499988935888" y="429.99999418854725"></omgdi:waypoint>
-        <omgdi:waypoint x="884.9999787658458" y="429.9999905593305"></omgdi:waypoint>
+        <omgdi:waypoint x="699.9499830126765" y="444.64787983573297"></omgdi:waypoint>
+        <omgdi:waypoint x="792.0" y="444.0"></omgdi:waypoint>
+        <omgdi:waypoint x="792.0" y="429.0"></omgdi:waypoint>
+        <omgdi:waypoint x="884.9999787658458" y="429.65034218484254"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-6F6E7B73-B2FE-4FC7-9F70-C6D7324D34AC" id="BPMNEdge_sid-6F6E7B73-B2FE-4FC7-9F70-C6D7324D34AC" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
-        <omgdi:waypoint x="984.9499787658457" y="429.9999896994992"></omgdi:waypoint>
-        <omgdi:waypoint x="1189.0" y="429.99999418854725"></omgdi:waypoint>
-        <omgdi:waypoint x="1189.1452768235445" y="525.5200485541541"></omgdi:waypoint>
+        <omgdi:waypoint x="984.9499787658294" y="429.8031404673416"></omgdi:waypoint>
+        <omgdi:waypoint x="1189.0" y="429.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1189.14553700516" y="525.5200485541541"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-240B1320-4783-4E61-8764-4E0C9404B469" id="BPMNEdge_sid-240B1320-4783-4E61-8764-4E0C9404B469" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.00000000000003" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="651.3999813675879" y="1286.2566427502675"></omgdi:waypoint>
@@ -758,9 +755,9 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         <omgdi:waypoint x="314.99999530612047" y="294.99999620020395"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-F57FCDFB-92B1-44C2-B062-F0EF77A8A1FB" id="BPMNEdge_sid-F57FCDFB-92B1-44C2-B062-F0EF77A8A1FB" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="50.0" flowable:targetDockerY="39.99999999999997">
-        <omgdi:waypoint x="866.5569555347801" y="695.5216834587862"></omgdi:waypoint>
-        <omgdi:waypoint x="875.0" y="729.9999897181989"></omgdi:waypoint>
-        <omgdi:waypoint x="899.9999785423283" y="729.9999878518297"></omgdi:waypoint>
+        <omgdi:waypoint x="866.6267547603053" y="695.5043881530632"></omgdi:waypoint>
+        <omgdi:waypoint x="875.0" y="729.0"></omgdi:waypoint>
+        <omgdi:waypoint x="899.9999785423262" y="729.3333278526893"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-D3367576-C647-4408-9F27-2B7A15BEA589" id="BPMNEdge_sid-D3367576-C647-4408-9F27-2B7A15BEA589" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.00000000000003">
         <omgdi:waypoint x="1032.1372355245037" y="1395.5579323797833"></omgdi:waypoint>
@@ -773,9 +770,9 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         <omgdi:waypoint x="394.9999891817572" y="1091.4999517351403"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-9B40F297-84A2-4998-BEBA-CF8A8A9A2CFD" id="BPMNEdge_sid-9B40F297-84A2-4998-BEBA-CF8A8A9A2CFD" flowable:sourceDockerX="50.00000000000003" flowable:sourceDockerY="39.99999999999997" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
-        <omgdi:waypoint x="924.9499877063745" y="639.9999910593034"></omgdi:waypoint>
-        <omgdi:waypoint x="1129.0" y="639.9999910593034"></omgdi:waypoint>
-        <omgdi:waypoint x="1129.2347451480387" y="803.191862916224"></omgdi:waypoint>
+        <omgdi:waypoint x="924.9499877065155" y="639.8031424351096"></omgdi:waypoint>
+        <omgdi:waypoint x="1129.0" y="639.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1129.2349008637425" y="803.191862916224"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-EBB76DDC-8B81-43BB-80A0-8ED2D24C3A56" id="BPMNEdge_sid-EBB76DDC-8B81-43BB-80A0-8ED2D24C3A56" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
         <omgdi:waypoint x="699.9499810543819" y="339.9999818729819"></omgdi:waypoint>
@@ -844,9 +841,9 @@ execution.setVariable('accesoHabilitado', true)]]></script>
         <omgdi:waypoint x="734.9999803303969" y="194.9999923259022"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-80FC4D55-D710-483D-9913-BF37CEF20702" id="BPMNEdge_sid-80FC4D55-D710-483D-9913-BF37CEF20702" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.00000000000003" flowable:targetDockerY="39.99999999999997">
-        <omgdi:waypoint x="743.2961976626857" y="662.9664119845241"></omgdi:waypoint>
-        <omgdi:waypoint x="743.0" y="639.9999910593034"></omgdi:waypoint>
-        <omgdi:waypoint x="824.9999877065422" y="639.9999910593034"></omgdi:waypoint>
+        <omgdi:waypoint x="743.3019423931307" y="662.9611649844239"></omgdi:waypoint>
+        <omgdi:waypoint x="743.0" y="639.0"></omgdi:waypoint>
+        <omgdi:waypoint x="824.9999877065374" y="639.6212065318659"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-4419725C-97EE-4794-BD2A-46AB192D82FC" id="BPMNEdge_sid-4419725C-97EE-4794-BD2A-46AB192D82FC" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="15.0" flowable:targetDockerY="15.0">
         <omgdi:waypoint x="495.3648540832795" y="215.3152009487451"></omgdi:waypoint>

@@ -43,6 +43,7 @@ public class LoginController {
                 session.setAttribute("password", password);
                 String destino = adminUsername.equals(usuario) ? "/empleados"
                         : rolService.esAdministrativo(usuario) ? "/administrativos"
+                        : rolService.esDocente(usuario) ? "/docentes"
                         : "/empleados";
                 return "redirect:" + destino;
             }

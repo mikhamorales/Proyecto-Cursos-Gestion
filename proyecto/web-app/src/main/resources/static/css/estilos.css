@@ -211,7 +211,8 @@ button:hover {
     font-size: 0.95rem;
 }
 
-.opcion-recurso input[type="checkbox"] {
+.opcion-recurso input[type="checkbox"],
+.opcion-recurso input[type="radio"] {
     width: auto;
     margin: 0;
 }

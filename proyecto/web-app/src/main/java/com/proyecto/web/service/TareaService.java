@@ -17,6 +17,7 @@ import java.util.Map;
 public class TareaService {
 
     public static final String TAREA_EVALUAR_RECURSOS = "Evaluar recursos";
+    public static final String TAREA_DESARROLLAR_CURSO = "Desarrollar curso";
 
     private final FlowableRestClient flowableRestClient;
 

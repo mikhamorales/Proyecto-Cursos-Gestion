@@ -13,12 +13,12 @@ import java.util.List;
 public class SolicitudService {
 
     private final FlowableRestClient flowableRestClient;
-    private final String processDefinitionKey;
+    private final String startMessage;
 
     public SolicitudService(FlowableRestClient flowableRestClient,
-            @Value("${flowable.process-definition-key:process}") String processDefinitionKey) {
+            @Value("${flowable.process-start-message:Solicitud de curso}") String startMessage) {
         this.flowableRestClient = flowableRestClient;
-        this.processDefinitionKey = processDefinitionKey;
+        this.startMessage = startMessage;
     }
 
     public String registrarSolicitud(SolicitudForm form) {
@@ -31,7 +31,7 @@ public class SolicitudService {
                 new VariableRequest("descripcion", form.getDescripcion()),
                 new VariableRequest("cantidadParticipantes", form.getCantidadParticipantes()),
                 new VariableRequest("fechasPreferidas", form.getFechasPreferidas()));
-        StartProcessRequest request = new StartProcessRequest(processDefinitionKey, variables);
+        StartProcessRequest request = new StartProcessRequest(startMessage, variables);
         return flowableRestClient.startProcess(request);
     }
 }

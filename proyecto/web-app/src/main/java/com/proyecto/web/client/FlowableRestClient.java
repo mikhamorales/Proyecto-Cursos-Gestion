@@ -72,12 +72,16 @@ public class FlowableRestClient {
     /**
      * Valida usuario y clave contra Flowable con autenticacion basica.
      *
+     * <p>Se consulta la API de proceso (un endpoint liviano) con las credenciales
+     * del usuario; asi la validacion funciona para cualquier usuario con acceso
+     * al motor y no depende de permisos de la API de identidad/UI.</p>
+     *
      * @return true si Flowable responde 200; false si responde 401/403.
      */
     public boolean validateCredentials(String usuario, String clave) {
         try {
-            uiClient.get()
-                    .uri("/idm/users/{usuario}", usuario)
+            processClient.get()
+                    .uri("/repository/process-definitions?latest=true&size=1")
                     .headers(headers -> headers.setBasicAuth(usuario, clave))
                     .retrieve()
                     .toBodilessEntity();
