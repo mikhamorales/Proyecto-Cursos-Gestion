@@ -209,7 +209,7 @@ execution.setVariable('accesoHabilitado', true)]]></script>
           <flowable:executionListener event="end" class="flowable.listeners.ListenerGenerico"></flowable:executionListener>
         </extensionElements>
       </serviceTask>
-      <boundaryEvent id="sid-8809100B-A6B1-4472-A02F-8273B4CD527A" attachedToRef="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D" cancelActivity="false">
+      <boundaryEvent id="sid-8809100B-A6B1-4472-A02F-8273B4CD527A" attachedToRef="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D">
         <compensateEventDefinition></compensateEventDefinition>
       </boundaryEvent>
       <serviceTask id="sid-C5D62DD3-223B-479A-9F46-D3BCD2AC2E90" name="Liberar aula" isForCompensation="true" flowable:class="flowable.listeners.TareaRealizada">
@@ -228,7 +228,7 @@ execution.setVariable('accesoHabilitado', true)]]></script>
           <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
         </extensionElements>
       </userTask>
-      <boundaryEvent id="sid-C925B450-2C19-455D-AB88-8A1337014BFE" attachedToRef="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" cancelActivity="false">
+      <boundaryEvent id="sid-C925B450-2C19-455D-AB88-8A1337014BFE" attachedToRef="sid-9DFA5D35-197B-4160-A846-715EE6B3E651">
         <compensateEventDefinition></compensateEventDefinition>
       </boundaryEvent>
       <serviceTask id="sid-CA860AD7-83F9-4734-A709-41F01D88805C" name="Liberar aula virtual" isForCompensation="true" flowable:class="flowable.listeners.TareaRealizada">
@@ -247,7 +247,7 @@ execution.setVariable('accesoHabilitado', true)]]></script>
           <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
         </extensionElements>
       </userTask>
-      <boundaryEvent id="sid-A5E9DA16-D099-439B-B683-ED017EACD460" attachedToRef="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" cancelActivity="false">
+      <boundaryEvent id="sid-A5E9DA16-D099-439B-B683-ED017EACD460" attachedToRef="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE">
         <compensateEventDefinition></compensateEventDefinition>
       </boundaryEvent>
       <userTask id="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8" name="Liberar equipamiento" isForCompensation="true" flowable:candidateGroups="administracion" flowable:formFieldValidation="true">
@@ -286,15 +286,12 @@ execution.setVariable('accesoHabilitado', true)]]></script>
       <sequenceFlow id="sid-80FC4D55-D710-483D-9913-BF37CEF20702" sourceRef="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846" targetRef="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D">
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${aulaFisica == true}]]></conditionExpression>
       </sequenceFlow>
-      <sequenceFlow id="sid-F57FCDFB-92B1-44C2-B062-F0EF77A8A1FB" sourceRef="sid-8809100B-A6B1-4472-A02F-8273B4CD527A" targetRef="sid-C5D62DD3-223B-479A-9F46-D3BCD2AC2E90"></sequenceFlow>
       <sequenceFlow id="sid-B7E33BE6-CFB5-49D2-9807-29860C3A179C" sourceRef="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846" targetRef="sid-9DFA5D35-197B-4160-A846-715EE6B3E651">
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${aulaVirtual == true}]]></conditionExpression>
       </sequenceFlow>
-      <sequenceFlow id="sid-878B11B0-1DDB-463A-9B19-52AE73CB68E3" sourceRef="sid-C925B450-2C19-455D-AB88-8A1337014BFE" targetRef="sid-CA860AD7-83F9-4734-A709-41F01D88805C"></sequenceFlow>
       <sequenceFlow id="sid-97872055-AEFE-45E5-9A5C-70D9CFD27E75" sourceRef="sid-5A1CF91B-3841-459C-BF9D-EE9544C3E846" targetRef="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE">
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${equipamientoEspecial == true}]]></conditionExpression>
       </sequenceFlow>
-      <sequenceFlow id="sid-BF0CFD2B-2129-4E51-A2A1-2322AFEFB211" sourceRef="sid-A5E9DA16-D099-439B-B683-ED017EACD460" targetRef="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8"></sequenceFlow>
       <sequenceFlow id="sid-2E29AA84-9717-4E8E-9C49-70B606069F4B" sourceRef="sid-9DFA5D35-197B-4160-A846-715EE6B3E651" targetRef="sid-E3A32C56-8536-4526-A638-448A00454329"></sequenceFlow>
       <sequenceFlow id="sid-9B40F297-84A2-4998-BEBA-CF8A8A9A2CFD" sourceRef="sid-075A4789-F9D1-473E-AD4F-4F3522EDC95D" targetRef="sid-E3A32C56-8536-4526-A638-448A00454329"></sequenceFlow>
       <sequenceFlow id="sid-54EA1B17-E4A4-4FEF-83BE-D7403B99321D" sourceRef="sid-1C25481F-A8F9-4022-AEAA-1C1AC9772FAE" targetRef="sid-E3A32C56-8536-4526-A638-448A00454329"></sequenceFlow>
@@ -433,6 +430,11 @@ execution.setVariable('accesoHabilitado', true)]]></script>
     <sequenceFlow id="sid-9CF578F1-D4AB-4D87-AC23-32CC6E2C2C9F" sourceRef="sid-0E1EA514-6D29-40B5-BFF9-3CF74DF444AD" targetRef="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2"></sequenceFlow>
     <sequenceFlow id="sid-88FC4336-3B80-491C-B1FB-D453722A3263" sourceRef="sid-895BA48F-B50A-4C10-9369-4CFEA6D67AC2" targetRef="sid-EDDAC05F-B007-4E01-8223-713A621E1188"></sequenceFlow>
     <sequenceFlow id="sid-D3367576-C647-4408-9F27-2B7A15BEA589" sourceRef="sid-EDDAC05F-B007-4E01-8223-713A621E1188" targetRef="sid-B6D61931-87C0-4758-AAA9-6546C5AF7F92"></sequenceFlow>
+
+    <!-- Asociaciones de compensacion: van despues de todos los sequenceFlow (artifacts del process). -->
+    <association id="Asociacion_LiberarAula" associationDirection="One" sourceRef="sid-8809100B-A6B1-4472-A02F-8273B4CD527A" targetRef="sid-C5D62DD3-223B-479A-9F46-D3BCD2AC2E90"></association>
+    <association id="Asociacion_LiberarAulaVirtual" associationDirection="One" sourceRef="sid-C925B450-2C19-455D-AB88-8A1337014BFE" targetRef="sid-CA860AD7-83F9-4734-A709-41F01D88805C"></association>
+    <association id="Asociacion_LiberarEquipamiento" associationDirection="One" sourceRef="sid-A5E9DA16-D099-439B-B683-ED017EACD460" targetRef="sid-101183A3-3C07-4B9B-8FE0-E64255CB99F8"></association>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration">
     <bpmndi:BPMNPlane bpmnElement="Collaboration" id="BPMNPlane_Collaboration">

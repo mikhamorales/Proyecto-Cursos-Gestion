@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Docente App - Gestion de Cursos</title>
+	<link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+	<header class="barra">
+		<h1>Panel Docente</h1>
+		<div class="sesion">
+			<span th:text="${usuario}">docente1</span>
+			<form method="post" th:action="@{/logout}">
+				<button type="submit" class="secundario">Salir</button>
+			</form>
+		</div>
+	</header>
+
+	<main>
+		<div class="alerta error" th:if="${error}" th:text="${error}"></div>
+		<div class="alerta ok" th:if="${mensaje}" th:text="${mensaje}"></div>
+
+		<p th:if="${esJefe}">Jefe del equipo docente: podes definir al docente y elaborar el informe.</p>
+
+		<section>
+			<h2>Mis tareas</h2>
+			<p class="vacio" th:if="${#lists.isEmpty(asignadas)}">No tenes tareas asignadas.</p>
+			<table th:unless="${#lists.isEmpty(asignadas)}">
+				<thead>
+					<tr>
+						<th>Tarea</th>
+						<th>Empresa</th>
+						<th>Tematica</th>
+						<th>Creada</th>
+						<th>Asignada a</th>
+						<th>Accion</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="t : ${asignadas}">
+						<td th:text="${t.nombre}">Desarrollar curso</td>
+						<td th:text="${t.empresa}">Empresa</td>
+						<td th:text="${t.tematica}">Tematica</td>
+						<td th:text="${t.fechaCreacion}">01/01/2026 10:00</td>
+						<td th:text="${t.asignadoA}">docente1</td>
+						<td>
+							<a class="accion" th:if="${t.esDefinirDocente and esJefe}"
+								th:href="@{/tareas/{id}/asignar(id=${t.id})}">Asignar docente</a>
+							<a class="accion" th:if="${t.esInforme and esJefe}"
+								th:href="@{/tareas/{id}/informe(id=${t.id})}">Cargar informe</a>
+							<form th:if="${t.esDesarrollo}" method="post"
+								th:action="@{/tareas/{id}/completar(id=${t.id})}">
+								<button type="submit" class="primario">Registrar finalizacion</button>
+							</form>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>Tareas para reclamar</h2>
+			<p class="vacio" th:if="${#lists.isEmpty(reclamables)}">
+				No hay tareas del equipo docente para reclamar.
+			</p>
+			<table th:unless="${#lists.isEmpty(reclamables)}">
+				<thead>
+					<tr>
+						<th>Tarea</th>
+						<th>Empresa</th>
+						<th>Tematica</th>
+						<th>Creada</th>
+						<th>Accion</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="t : ${reclamables}">
+						<td th:text="${t.nombre}">Desarrollar curso</td>
+						<td th:text="${t.empresa}">Empresa</td>
+						<td th:text="${t.tematica}">Tematica</td>
+						<td th:text="${t.fechaCreacion}">01/01/2026 10:00</td>
+						<td>
+							<form method="post" th:action="@{/tareas/{id}/reclamar(id=${t.id})}">
+								<button type="submit" class="secundario">Reclamar</button>
+							</form>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+	</main>
+</body>
+</html>

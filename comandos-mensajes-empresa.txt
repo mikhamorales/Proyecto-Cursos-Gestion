@@ -1,0 +1,149 @@
+=====================================================================
+SIMULAR LA RESPUESTA DE LA EMPRESA EN FLOWABLE
+====================================================================-
+
+Tres cosas que hay que saber antes de copiar comandos:
+
+  1. Aprobacion, Rechazo, Modificacion y Cancelacion son MENSAJES.
+     Se envian con PUT ... {"action":"messageEventReceived", ...}
+  2. "Recibir nomina" NO es un mensaje: es una receiveTask. Se dispara
+     con PUT ... {"action":"trigger"}
+  3. El ID que va siempre en la URL es un executionId. NO es el
+     processInstanceId de las apps ni el taskId de una tarea.
+
+---------------------------------------------------------------------
+DATOS FIJOS
+---------------------------------------------------------------------
+
+API REST : http://localhost:8080/flowable-ui/process-api
+Credenciales: admin / test      -> en los curl: -u admin:test
+
+Si el motor no responde:
+    docker compose up -d
+
+Los comandos van en una sola linea: se pegan tal cual en PowerShell o
+en bash (curl.exe evita el alias Invoke-WebRequest de Windows). jq es
+opcional, solo ordena la salida.
+
+---------------------------------------------------------------------
+1) BUSCAR LOS ID
+---------------------------------------------------------------------
+
+--- Ver las instancias (cada solicitud de curso) ---------------------
+
+curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/runtime/process-instances?processDefinitionKey=process"
+
+Solo los ids:
+
+curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/runtime/process-instances?processDefinitionKey=process" | jq -r '.data[] | .id'
+
+--- executionId de los MENSAJES -------------------------------------
+
+curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/runtime/event-subscriptions?eventType=message"
+
+Mas legible (instancia | executionId | mensaje | actividad):
+
+curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/runtime/event-subscriptions?eventType=message" | jq -r '.data[] | [.processInstanceId,.executionId,.eventName,.activityId] | @tsv'
+
+Copiar el executionId de la fila del mensaje que se quiera enviar.
+La fila "Solicitud de curso" no tiene executionId: es el inicio del
+proceso y no sirve para estos comandos.
+
+--- executionId de "Recibir nomina" ---------------------------------
+
+Este NO sale de event-subscriptions (no es mensaje). Sale de executions:
+
+curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/runtime/executions?processInstanceId=<ID_INSTANCIA>" | jq -r '.data[] | select(.activityId=="sid-982375C3-4EF8-435A-A291-BF9A1933A05C") | .id'
+
+Si no devuelve nada, la instancia todavia no llego a "Recibir nomina":
+esa tarea esta dentro de "Preparar curso", despues de enviar Aprobacion.
+
+--- Ver en que tarea esta una instancia (opcional) ------------------
+
+curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/runtime/tasks?processInstanceId=<ID_INSTANCIA>" | jq -r '.data[] | [.id,.name,.assignee] | @tsv'
+
+---------------------------------------------------------------------
+2) ENVIAR MENSAJES DE LA EMPRESA
+---------------------------------------------------------------------
+
+Plantilla (rellenar <NOMBRE> y <EXECUTION_ID>):
+
+curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"messageEventReceived","messageName":"<NOMBRE>","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/<EXECUTION_ID>"
+
+
+ACEPTAR LA PROPUESTA (Aprobacion):
+
+curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"messageEventReceived","messageName":"Aprobacion","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/<ID_APROBACION>"
+
+
+RECHAZAR LA PROPUESTA (Rechazo):
+
+curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"messageEventReceived","messageName":"Rechazo","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/<ID_RECHAZO>"
+
+
+PEDIR MODIFICACIONES (Modificacion):
+
+curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"messageEventReceived","messageName":"Modificacion","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/<ID_MODIFICACION>"
+
+
+CANCELAR EL CURSO (Cancelacion):
+
+curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"messageEventReceived","messageName":"Cancelacion","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/<ID_CANCELACION>"
+
+
+Enviar SOLO UNO de los tres primeros: al disparar uno se consumen las
+demas suscripciones del gateway "Esperar respuesta". "Cancelacion"
+aparece mas tarde, cuando la instancia ya esta en "Preparar curso".
+
+---------------------------------------------------------------------
+3) SIMULAR "RECIBIR NOMINA"
+---------------------------------------------------------------------
+
+Plantilla (rellenar <ID_RECIBIR_NOMINA> con el id del paso 1):
+
+curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"trigger","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/<ID_RECIBIR_NOMINA>"
+
+Es un "trigger", no un messageEventReceived: por eso no lleva messageName.
+
+---------------------------------------------------------------------
+4) EJEMPLO REAL (instancia 6cc621f0-e2e8-11f1-bd99-ea2b43ae71d3)
+---------------------------------------------------------------------
+
+Son IDs de ejemplo: si tu instancia es otra, buscalos con el paso 1.
+
+Recibir nomina (execution e40a3418-e2e8-11f1-bd99-ea2b43ae71d3):
+
+curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"trigger","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/e40a3418-e2e8-11f1-bd99-ea2b43ae71d3"
+
+Cancelacion (execution e40a3416-e2e8-11f1-bd99-ea2b43ae71d3):
+
+curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"messageEventReceived","messageName":"Cancelacion","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/e40a3416-e2e8-11f1-bd99-ea2b43ae71d3"
+
+Esta instancia ya consumo Aprobacion, por eso su unica suscripcion de
+mensaje es "Cancelacion" (mas la global "Solicitud de curso").
+
+OJO: esa instancia pertenece a process:2 (modelo viejo, sin el fix de
+compensacion), asi que las tareas de recursos siguen fallando ahi.
+El modelo corregido ya esta desplegado como process:3. Para probar
+"Evaluar recursos" y sus ramas, crear una solicitud NUEVA.
+
+---------------------------------------------------------------------
+5) SI ALGO FALLA
+---------------------------------------------------------------------
+
+- "does not have a subscription to a message event with name X":
+  revisar el messageName y el executionId. Copiar el eventName exacto
+  de event-subscriptions (Aprobacion, Rechazo, Modificacion,
+  Cancelacion; NO MAceptacion ni MRechazo).
+
+- "Could not find an execution with id ...": el executionId quedo
+  viejo; volver a consultar con el paso 1.
+
+- "curl: (3) Malformed input to a URL function": hay un espacio al
+  final de la URL o la URL esta a medias. Pegar sin espacios.
+
+- "Request method 'POST' not supported": usar -X PUT, no -X POST.
+
+- 401: revisar admin/test.
+- 500: ver logs con "docker compose logs -f flowable-ui".
+- No conecta: "docker compose ps".

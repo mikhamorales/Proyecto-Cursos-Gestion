@@ -137,6 +137,8 @@ Si el usuario logueado coincide con `flowable.admin.username` (por defecto `admi
 El envío hace `PUT /runtime/executions/{executionId}` con `{"action":"messageEventReceived","messageName":"..."}`. Antes de enviar se valida que la suscripción siga existiendo; si ya no está, se muestra "La instancia ya no espera ese mensaje.".
 
 > El panel necesita que el BPMN (con los `messageEventDefinition`) y el DMN `viabilidad` estén desplegados en el motor. Los archivos viven en `proyecto/shared/src/resources/` y se despliegan a mano; no se empaquetan en el jar de `shared`.
+>
+> La tabla muestra las etiquetas del panel; el `messageName` enviado es siempre el `eventName` real que devuelve Flowable (`Aprobacion`, `Rechazo`, `Modificacion`, `Cancelacion`). Los comandos `curl` equivalentes están en `comandos-mensajes-empresa.txt` (raíz del repo), incluido el disparo de **"Recibir nomina"**, que es una `receiveTask` y se dispara con `{"action":"trigger"}`, no con un mensaje.
 
 ### Pantallas de administración (`/administrativos`)
 
@@ -199,11 +201,13 @@ Para que las pantallas de administración funcionen hubo que ajustar el modelo. 
 
 > `AsignarTarea` sigue funcionando en "Confeccionar lista definitiva": al crearse la tarea se asigna a un administrativo.
 
-## Pendiente conocido (futura issue)
+## Compensación de recursos (arreglado en el BPMN, requiere redespliegue)
 
-Al completar cualquier tarea que tenga un **boundary event de compensación** ("Reservar aula", "Solicitar aula virtual", "Contratar equipamiento"), el motor responde 500 con `Parent activity for boundary compensation event could not be found`. Causa: esos boundary events están cableados a sus handlers ("Liberar aula", "Liberar aula virtual", "Liberar equipamiento") con `<sequenceFlow>` en vez de `<association>`, y Flowable resuelve el handler buscando **associations** (no hay ninguna en el archivo). Es **preexistente** —la versión `v3` falla igual— y quedó fuera del alcance de issue3.
+Al completar "Evaluar recursos" (y las tareas de reserva de recursos), el motor respondía 500 con `Parent activity for boundary compensation event could not be found`. Causa: los boundary events de compensación estaban cableados a sus handlers ("Liberar aula", "Liberar aula virtual", "Liberar equipamiento") con `<sequenceFlow>` en vez de `<association>`.
 
-Fix probado pero **no aplicado**: agregar 3 `<association associationDirection="One" sourceRef="<boundaryEvent>" targetRef="<handler>">`, borrar los 3 `<sequenceFlow>` que hoy van del boundary al handler y quitarles `cancelActivity="false"`. Con eso "Solicitar aula virtual" completa 200 y el proceso avanza. Conviene revisar también el camino de cancelación (`MCancelacion`), que dispara compensación.
+Fix **aplicado** en `Institucion_de_capacitacion.bpmn20.xml`: los 3 boundary events ahora usan `<association associationDirection="One">` hacia sus handlers y ya no llevan `cancelActivity="false"`. Las `<association>` van **después de todos los `<sequenceFlow>`** dentro de `<process>`: en el XSD de BPMN 2.0 son `artifact`, no `flowElement`, y si se dejan en medio del flujo Flowable rechaza el despliegue con `cvc-complex-type.2.4.a: ... One of 'artifact' is expected`.
+
+> **Importante:** editar el XML no cambia el motor. Hay que **volver a desplegar** el modelo en Flowable y probar con una **instancia nueva**: cada instancia queda ligada a su `processDefinitionId` original y sigue usando el modelo viejo. En este entorno el modelo corregido quedó desplegado como `process:3` (el `process:2` anterior era una copia sin el fix). El camino de cancelación (`Cancelacion`) también dispara esta compensación y fue verificado.
 
 ## Estructura de carpetas
 

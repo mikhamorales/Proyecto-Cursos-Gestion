@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Definir docente - Docente App</title>
+	<link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+	<header class="barra">
+		<h1>Panel Docente</h1>
+	</header>
+	<main>
+		<div class="alerta error" th:if="${error}" th:text="${error}"></div>
+
+		<section class="tarjeta ancha">
+			<h2>Definir docente</h2>
+			<p class="ayuda">Selecciona el docente que desarrollara el curso. Podes elegirte a vos mismo.</p>
+			<p><strong>Tarea:</strong> <span th:text="${tarea.nombre}">Definir docente</span></p>
+			<p><strong>Empresa:</strong> <span th:text="${tarea.empresa}">Empresa</span>
+				<strong>Tematica:</strong> <span th:text="${tarea.tematica}">Tematica</span></p>
+
+			<form method="post" th:action="@{/tareas/{id}/definir-docente(id=${taskId})}"
+				th:object="${definirDocenteForm}">
+				<fieldset>
+					<legend>Docentes disponibles</legend>
+					<label class="opcion" th:each="docente : ${docentes}">
+						<input type="radio" th:field="*{docente}" th:value="${docente}" required>
+						<span th:text="${docente}">docente</span>
+					</label>
+				</fieldset>
+				<button type="submit" class="primario">Guardar y completar</button>
+				<a class="volver" th:href="@{/}">Volver a mis tareas</a>
+			</form>
+		</section>
+	</main>
+</body>
+</html>

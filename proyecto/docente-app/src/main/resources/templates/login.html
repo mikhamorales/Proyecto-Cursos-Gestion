@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Ingreso - Docente App</title>
+	<link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="centrado">
+	<main class="tarjeta">
+		<h1>Panel Docente</h1>
+		<p class="ayuda">Ingresa con un usuario del grupo <strong>docentes</strong>.</p>
+
+		<div class="alerta error" th:if="${error}" th:text="${error}"></div>
+
+		<form method="post" th:action="@{/login}">
+			<label for="usuario">Usuario</label>
+			<input id="usuario" name="usuario" type="text" th:value="${usuario}" autocomplete="username" required autofocus>
+
+			<label for="password">Contrasena</label>
+			<input id="password" name="password" type="password" autocomplete="current-password" required>
+
+			<button type="submit" class="primario">Ingresar</button>
+		</form>
+	</main>
+</body>
+</html>

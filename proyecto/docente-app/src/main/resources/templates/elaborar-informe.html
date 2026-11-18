@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Elaborar informe - Docente App</title>
+	<link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+	<header class="barra">
+		<h1>Panel Docente</h1>
+	</header>
+	<main>
+		<div class="alerta error" th:if="${error}" th:text="${error}"></div>
+
+		<section class="tarjeta ancha">
+			<h2>Elaborar informe de resultados</h2>
+			<p class="ayuda">El texto se guarda como variable del proceso. No se adjunta ningun PDF.</p>
+			<p><strong>Tarea:</strong> <span th:text="${tarea.nombre}">Elaborar informe</span></p>
+			<p><strong>Empresa:</strong> <span th:text="${tarea.empresa}">Empresa</span>
+				<strong>Tematica:</strong> <span th:text="${tarea.tematica}">Tematica</span></p>
+
+			<form method="post" th:action="@{/tareas/{id}/informe(id=${taskId})}"
+				th:object="${informeForm}">
+				<label for="contenido">Contenido del informe</label>
+				<textarea id="contenido" th:field="*{contenido}" rows="10" required></textarea>
+				<button type="submit" class="primario">Guardar y completar</button>
+				<a class="volver" th:href="@{/}">Volver a mis tareas</a>
+			</form>
+		</section>
+	</main>
+</body>
+</html>
