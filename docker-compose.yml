@@ -11,6 +11,11 @@
 # proyecto/shared/Database.sql (ver proyecto/web-app/README.md).
 # =====================================================================
 
+# Proyecto fijo: así "docker compose up" funciona igual desde la raíz del
+# repo que desde C:\Users\joaqu (donde hay un compose que hace include de este).
+# Sin esto, cada directorio crea un proyecto distinto y pelean por el puerto 8080.
+name: joaqu
+
 services:
   # -------------------------------------------------------------------
   # PostgreSQL. El nombre del servicio es "postgres" a propósito: es el

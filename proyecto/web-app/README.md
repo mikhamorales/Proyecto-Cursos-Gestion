@@ -42,7 +42,7 @@ docker exec flowable-postgres psql -U flowable -d institucion -c '\dt'
 
 Deberías ver las tablas `empresa`, `cuenta_empresa`, `curso` y `propuesta`.
 
-La conexión desde el host (pgAdmin, DBeaver, etc.) es `localhost:5432`, base `institucion`, usuario `flowable`, contraseña `flow123` (los valores del `.env` del compose). Los listeners del proceso, en cambio, usan `jdbc:postgresql://postgres:5432/institucion`: el hostname `postgres` es el nombre del servicio **dentro** de la red de Docker.
+El compose **no publica el 5432 en el host**: conectate con `docker exec -i flowable-postgres psql -U flowable -d institucion` (o agregá temporalmente `ports: ["127.0.0.1:5432:5432"]` si necesitás pgAdmin/DBeaver). Base `institucion`, usuario `flowable`, contraseña `flow123`. Los listeners del proceso usan `jdbc:postgresql://postgres:5432/institucion`: el hostname `postgres` es el nombre del servicio **dentro** de la red de Docker.
 
 ## Listeners Java del BPMN (no lo borres)
 
@@ -72,7 +72,11 @@ Copy-Item proyecto/shared/target/proyecto-0.0.1-SNAPSHOT.jar proyecto/shared/lib
 docker compose -p joaqu up -d --no-deps --force-recreate flowable-ui
 ```
 
-En este entorno los contenedores pertenecen al proyecto `joaqu` de Compose (el compose original está en `C:\Users\joaqu\docker-compose.yml`, que también tiene el mount). Por eso hay que pasar `-p joaqu`. En una instalación limpia, con `docker compose up -d` desde la raíz del repo alcanza.
+En este entorno **se corre `docker compose up -d` desde la home** (`/mnt/c/Users/joaqu` en WSL, `C:\Users\joaqu` en PowerShell). El compose de la home (`C:\Users\joaqu\docker-compose.yml`) es autocontenido: no hace `include` ni depende del compose del repo. El `docker-compose.yml` del repo queda como referencia; no hay que usarlo para levantar los contenedores.
+
+> **No hardcodees la ruta del JAR con letra de unidad.** Si se escribe `C:/Users/...`, Compose corriendo en WSL lo interpreta como ruta relativa (`/mnt/c/Users/joaqu/C:/Users/...`) y falla con `no such file or directory`; en Windows el daemon Linux cuenta el `:` como separador y da `invalid volume specification`. Usá siempre `source` relativo al compose (`./eclipse-workspace/...` desde la home, `./proyecto/...` desde el repo). Tampoco conviene duplicar el compose con otro `container_name`: dos proyectos pelean por el puerto 8080 y sale `address already in use`. Ambos compose declaran `name: joaqu` para evitarlo.
+
+> **Puertos:** solo se publica Flowable en `127.0.0.1:8080:8080` (IPv4). Con el bind dual-stack por defecto, WSL levanta `wslrelay` en `::1:8080` y, al recrear contenedores, Docker no puede bindear `[::]` y falla con `address already in use`. Postgres queda solo en `expose: 5432` ( visible dentro de la red Docker, sin publicar en el host ) para que nunca haya conflicto en ese puerto. `localhost:8080` desde el navegador de Windows sigue funcionando igual.
 
 ## Configuración
 
