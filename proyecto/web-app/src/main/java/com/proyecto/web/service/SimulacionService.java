@@ -94,15 +94,15 @@ public class SimulacionService {
 
     private static String etiqueta(String eventName) {
         return switch (eventName) {
-            case "MModificacion" -> "Enviar modificaciones";
-            case "MRechazo" -> "Rechazar";
-            case "MAceptacion" -> "Aceptar";
-            case "MCancelacion" -> "Cancelar curso";
+            case "Modificacion" -> "Enviar modificaciones";
+            case "Rechazo" -> "Rechazar";
+            case "Aprobacion" -> "Aceptar";
+            case "Cancelacion" -> "Cancelar curso";
             default -> eventName;
         };
     }
 
     private static boolean esPeligrosa(String eventName) {
-        return "MRechazo".equals(eventName) || "MCancelacion".equals(eventName);
+        return "Rechazo".equals(eventName) || "Cancelacion".equals(eventName);
     }
 }

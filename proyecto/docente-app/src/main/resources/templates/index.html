@@ -45,11 +45,11 @@
 						<td th:text="${t.fechaCreacion}">01/01/2026 10:00</td>
 						<td th:text="${t.asignadoA}">docente1</td>
 						<td>
-							<a class="accion" th:if="${t.esDefinirDocente and esJefe}"
+							<a class="accion" th:if="${t.definirDocente and esJefe}"
 								th:href="@{/tareas/{id}/asignar(id=${t.id})}">Asignar docente</a>
-							<a class="accion" th:if="${t.esInforme and esJefe}"
+							<a class="accion" th:if="${t.informe and esJefe}"
 								th:href="@{/tareas/{id}/informe(id=${t.id})}">Cargar informe</a>
-							<form th:if="${t.esDesarrollo}" method="post"
+							<form th:if="${t.desarrollo}" method="post"
 								th:action="@{/tareas/{id}/completar(id=${t.id})}">
 								<button type="submit" class="primario">Registrar finalizacion</button>
 							</form>

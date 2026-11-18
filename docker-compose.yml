@@ -59,6 +59,11 @@ services:
       FLOWABLE_COMMON_APP_IDM-ADMIN_PASSWORD: ${FLOWABLE_ADMIN_PASSWORD:-test}
     ports:
       - "8080:8080"
+    # Los listeners Java del BPMN (flowable.listeners.*) viven en este JAR.
+    # Sin este mount, al recrear el contenedor se pierde y el motor devuelve
+    # HTTP 500 al iniciar una instancia: ClassNotFoundException: ContarActivas.
+    volumes:
+      - ./proyecto/shared/lib/proyecto-0.0.1-SNAPSHOT.jar:/app/WEB-INF/lib/proyecto-0.0.1-SNAPSHOT.jar:ro
     networks:
       - flowable-net
 

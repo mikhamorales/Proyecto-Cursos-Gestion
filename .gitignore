@@ -12,6 +12,8 @@
 
 # Package Files #
 *.jar
+# El JAR de listeners se versiona: Flowable UI lo necesita en su classpath.
+!proyecto/shared/lib/*.jar
 *.war
 *.nar
 *.ear

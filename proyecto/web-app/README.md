@@ -44,6 +44,36 @@ Deberías ver las tablas `empresa`, `cuenta_empresa`, `curso` y `propuesta`.
 
 La conexión desde el host (pgAdmin, DBeaver, etc.) es `localhost:5432`, base `institucion`, usuario `flowable`, contraseña `flow123` (los valores del `.env` del compose). Los listeners del proceso, en cambio, usan `jdbc:postgresql://postgres:5432/institucion`: el hostname `postgres` es el nombre del servicio **dentro** de la red de Docker.
 
+## Listeners Java del BPMN (no lo borres)
+
+El proceso usa listeners `flowable.listeners.*` (`ContarActivas`, `EstadoEnPreparacion`, `ActualizarEstado`, `TareaRealizada`, `ListenerGenerico`). Están compilados en:
+
+```
+proyecto/shared/lib/proyecto-0.0.1-SNAPSHOT.jar
+```
+
+El `docker-compose.yml` los monta dentro del contenedor, en el classpath del motor:
+
+```
+./proyecto/shared/lib/proyecto-0.0.1-SNAPSHOT.jar:/app/WEB-INF/lib/proyecto-0.0.1-SNAPSHOT.jar:ro
+```
+
+Si el contenedor se recrea sin ese mount, `web-app` vuelve a fallar al enviar la solicitud con `HTTP 500` y en `docker logs flowable-ui` aparece:
+
+```
+ClassNotFoundException: flowable.listeners.ContarActivas
+```
+
+Después de cambiar código de listeners, actualizá el JAR y recreá **solo** Flowable:
+
+```bash
+mvn -f proyecto/shared/pom.xml package -DskipTests
+Copy-Item proyecto/shared/target/proyecto-0.0.1-SNAPSHOT.jar proyecto/shared/lib/proyecto-0.0.1-SNAPSHOT.jar
+docker compose -p joaqu up -d --no-deps --force-recreate flowable-ui
+```
+
+En este entorno los contenedores pertenecen al proyecto `joaqu` de Compose (el compose original está en `C:\Users\joaqu\docker-compose.yml`, que también tiene el mount). Por eso hay que pasar `-p joaqu`. En una instalación limpia, con `docker compose up -d` desde la raíz del repo alcanza.
+
 ## Configuración
 
 `src/main/resources/application.properties`:
@@ -129,10 +159,10 @@ Si el usuario logueado coincide con `flowable.admin.username` (por defecto `admi
 
 | Mensaje | Botón | Efecto |
 |---|---|---|
-| `MModificacion` | Enviar modificaciones | Vuelve a la tarea "Revisar propuesta" |
-| `MRechazo` | Rechazar | Deriva a "Archivar solicitud" y termina en `RECHAZADO` |
-| `MAceptacion` | Aceptar | Entra al subproceso "Preparar curso" |
-| `MCancelacion` | Cancelar curso | Compensa recursos, notifica el cierre y termina en `CANCELADO` |
+| `Modificacion` | Enviar modificaciones | Vuelve a la tarea "Revisar propuesta" y reinicia `recordatorios` a 0 |
+| `Rechazo` | Rechazar | Deriva a "Archivar solicitud" y termina en `RECHAZADO` |
+| `Aprobacion` | Aceptar | Habilita el acceso y sigue a "Preparar materiales" |
+| `Cancelacion` | Cancelar curso | Interrumpe "Preparar curso", libera recursos y termina en `CANCELADO` |
 
 El envío hace `PUT /runtime/executions/{executionId}` con `{"action":"messageEventReceived","messageName":"..."}`. Antes de enviar se valida que la suscripción siga existiendo; si ya no está, se muestra "La instancia ya no espera ese mensaje.".
 
@@ -187,9 +217,9 @@ La pantalla muestra dos secciones:
 | Tareas del grupo Docentes | Tareas sin asignar disponibles para el usuario (`candidateUser`) | **Reclamar** |
 
 - El jefe docente ve la tarea "Definir docente..." y al completarla envía la variable `docenteSeleccionado` con el usuario elegido. Puede seleccionarse a sí mismo.
-- El docente elegido debe ver "Desarrollar curso" en **Mis tareas** y puede registrar la finalización del dictado.
+- El docente elegido ve "Desarrollar curso" en **Mis tareas** y puede registrar la finalización del dictado.
 - "Elaborar informe de resultados" aparece como tarea candidata del jefe y se puede reclamar y completar desde esta pantalla (sin carga de PDF).
-- **Requisito pendiente en el BPMN:** la tarea "Desarrollar curso" hoy tiene `flowable:candidateGroups="docentes"`. Para que quede asignada automáticamente al docente elegido, debe cambiarse a `flowable:assignee="${docenteSeleccionado}"`. Sin ese cambio, la tarea aparece en **Tareas del grupo Docentes** y cualquier docente puede reclamarla.
+- **Asignación corregida en el BPMN:** "Desarrollar curso" usa `flowable:assignee="${docenteSeleccionado}"` (sin comillas alrededor de la expresión). Antes tenía `"${docenteSeleccionado}"`, y Flowable guardaba el assignee como `"docente1"` **con comillas literales**: la tarea se creaba, pero la app la buscaba como `docente1` y el docente nunca veía el botón. Además, entre "Definir docente" y "Desarrollar curso" hay un timer de 2 minutos (`PT2M`); la tarea aparece recién cuando vence.
 
 ## Cambios en el BPMN (issue3)
 
@@ -197,17 +227,55 @@ Para que las pantallas de administración funcionen hubo que ajustar el modelo. 
 
 - **Tareas de grupo reclamables**: el `taskListener` `AsignarTarea` (que asigna por round-robin) quedó **solo** en "Confeccionar lista definitiva". Antes estaba en las 6 tareas de administración y las preasignaba, así que nunca aparecían en **Tareas del grupo** para reclamar.
 - **Ramas condicionales de recursos**: el gateway inclusivo que sigue a "Evaluar recursos" ahora tiene tres `conditionExpression` (`${aulaFisica == true}`, `${aulaVirtual == true}`, `${equipamientoEspecial == true}`). Así solo se activan las ramas de los recursos marcados; sin condiciones, el gateway activaba las tres siempre.
-- El proceso quedó desplegado como `process:4` (`process:4:47a392b3-dfb6-11f1-8fb8-223850ed8974`).
+- El proceso quedó desplegado como `process:8` (sin compensación BPMN; ver abajo) y luego como `process:10` al corregir la asignación de "Desarrollar curso" (versión actual).
 
 > `AsignarTarea` sigue funcionando en "Confeccionar lista definitiva": al crearse la tarea se asigna a un administrativo.
 
-## Compensación de recursos (arreglado en el BPMN, requiere redespliegue)
+## Compensación de recursos: rediseñada para que el Modeler no la rompa
 
-Al completar "Evaluar recursos" (y las tareas de reserva de recursos), el motor respondía 500 con `Parent activity for boundary compensation event could not be found`. Causa: los boundary events de compensación estaban cableados a sus handlers ("Liberar aula", "Liberar aula virtual", "Liberar equipamiento") con `<sequenceFlow>` en vez de `<association>`.
+Al completar "Evaluar recursos" (y las tareas de reserva), el motor respondía 500 con `Parent activity for boundary compensation event could not be found`. La causa era estructural: los boundary events de compensación necesitan `<association>` hacia sus handlers, y el **Flowable Modeler no preserva las `<association>`**: al pegar el XML y guardar, las elimina, reintroduce `cancelActivity="false"` y regenera un XML inválido para el motor. Probar con `activityRef` en `<compensateEventDefinition>` tampoco funciona en Flowable 6.8.0 (sigue dando HTTP 500).
 
-Fix **aplicado** en `Institucion_de_capacitacion.bpmn20.xml`: los 3 boundary events ahora usan `<association associationDirection="One">` hacia sus handlers y ya no llevan `cancelActivity="false"`. Las `<association>` van **después de todos los `<sequenceFlow>`** dentro de `<process>`: en el XSD de BPMN 2.0 son `artifact`, no `flowElement`, y si se dejan en medio del flujo Flowable rechaza el despliegue con `cvc-complex-type.2.4.a: ... One of 'artifact' is expected`.
+Para que el modelo sea **útil y visible en Flowable** se rediseñó sin compensación BPMN:
 
-> **Importante:** editar el XML no cambia el motor. Hay que **volver a desplegar** el modelo en Flowable y probar con una **instancia nueva**: cada instancia queda ligada a su `processDefinitionId` original y sigue usando el modelo viejo. En este entorno el modelo corregido quedó desplegado como `process:3` (el `process:2` anterior era una copia sin el fix). El camino de cancelación (`Cancelacion`) también dispara esta compensación y fue verificado.
+- Se eliminaron los 3 boundary events de compensación, el event-subprocess de cancelación y el throw event "Liberar recursos".
+- "Liberar aula", "Liberar aula virtual" y "Liberar equipamiento" dejaron de ser `isForCompensation="true"` y son **tareas normales**, conectadas con `sequenceFlow` (elementos que el Modeler sí conserva).
+- El boundary event de error sobre "Preparar curso" pasó a ser un **boundary event de mensaje** (`msgCancelacion`). Al recibir `Cancelacion` se interrumpe "Preparar curso", corren las dos tareas automáticas de liberación, aparece "Liberar equipamiento" para el grupo `administracion`, y el proceso termina con `resultado=CANCELADO`.
+
+Ventajas: el modelo se puede abrir, editar y guardar en el Modeler sin perder la lógica; las tareas de liberación son visibles y reclamables desde la UI; el resto del flujo (Evaluar recursos, nómina, DMN, docentes) no cambió. Se verifica con una instancia nueva de `process:7`: Evaluar recursos → 200, `Recibir nomina` (`trigger`) → 200, `Cancelacion` → 200, tarea "Liberar equipamiento" completable y `resultado=CANCELADO`.
+
+Después se corrigió además un fallo específico del importador del Modeler (`Import failed ... error message null`, NPE en `BpmnJsonConverter.convertToJson`): las 3 tareas nuevas de liberación no estaban declaradas en los `<flowNodeRef>` de la lane "Administracion", y el convertidor asumía que todo `sequenceFlow` de primer nivel tenía su origen dentro de una lane. Con esos 3 `flowNodeRef` añadidos, el **Import Process** del Modeler termina con HTTP 200, abre el editor y muestra "Recibir nomina", "Liberar aula", "Liberar aula virtual" y "Liberar equipamiento". El XML se redesplegó como `process:8`.
+
+> Editar el XML no cambia el motor: hay que redesplegar y probar con una **instancia nueva**. Cada instancia queda ligada a su `processDefinitionId` original y no se puede migrar. Comandos en `comandos-mensajes-empresa.txt`.
+
+> Corrección final (`process:10`): la expresión de assignee de "Desarrollar curso" llevaba comillas dobles literales (`"${docenteSeleccionado}"`), así que el assignee quedaba como `"docente1"` y la app nunca encontraba la tarea. Sin las comillas, el assignee es `docente1` y el botón "Registrar finalizacion" aparece al iniciar sesión como ese docente. Verificado con una instancia nueva: login `docente1/docente1` → **Mis tareas** muestra "Desarrollar curso", "Empresa Prueba", "Curso Prueba" y el botón. El modelo del Flowable Modeler también se actualizó (misma corrección, versión 2 del modelo `Institucion de capacitacion`).
+
+## Pruebas de los escenarios del proceso
+
+Hay dos niveles de pruebas:
+
+**Unitarias** (no necesitan Docker): `mvn test -q` en `web-app`, `docente-app` y `shared`. Incluyen `SimulacionServiceTest`, que verifica que los botones del panel usen los nombres reales de los mensajes (`Aprobacion`, `Rechazo`, `Modificacion`, `Cancelacion`) y marquen como peligrosos solo `Rechazo` y `Cancelacion`, y `HomeControllerVistaTest`, que comprueba que la plantilla de `docente-app` renderice sin errores.
+
+**End-to-end** (necesitan Docker con `flowable-ui` y `flowable-postgres` arriba, el proceso `process` desplegado y el JAR de listeners montado). Desde la raíz del repo:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/test-escenarios-flowable.ps1
+```
+
+El script crea instancias reales por REST y filas temporales en `curso`, comprueba 5 escenarios y limpia todo al terminar:
+
+| # | Escenario | Comprobación principal |
+|---|---|---|
+| 1 | Curso aprobado | `Aprobacion` → `accesoHabilitado=true` y tarea "Preparar materiales" |
+| 2 | Curso rechazado | `Rechazo` → `resultado=RECHAZADO`, "Archivar solicitud" y fin de la instancia |
+| 3 | Curso modificado | `Modificacion` → "Revisar propuesta", `recordatorios=0` y vuelta a esperar `Aprobacion` |
+| 4 | Umbral del DMN | 4 cursos en preparación → `viable=true`; 5 → `viable=false` y `resultado=NO_VIABLE` |
+| 5 | Empresa con 2 notificaciones | 1.er y 2.º timer → `recordatorios=1` y `2` sin cierre; 3.er timer → `CERRADO_POR_FALTA_DE_RESPUESTA` |
+
+> La regla del DMN es **`cursosEnPreparacion >= 5`** (no `> 5`): con 5 cursos ya se considera no viable. El script lo verifica expresamente.
+>
+> Para forzar los timers se usa `POST /management/timer-jobs/{id}` con `{"action":"move"}` y luego `POST /management/jobs/{id}` con `{"action":"execute"}`. Si el async executor los ejecuta primero, un `404` es esperable y el script lo tolera validando la variable resultante.
+
+Resultado esperado al terminar: `RESULTADO: TODOS LOS ESCENARIOS PASARON`, `EXIT_CODE=0` y ninguna fila `E2E-%` en la tabla `curso`.
 
 ## Estructura de carpetas
 
@@ -244,7 +312,8 @@ web-app/
     │           ├── docentes.html
     │           └── asignar-docente.html
     └── test/java/com/proyecto/web/
-        └── WebApplicationTests.java
+        ├── WebApplicationTests.java
+        └── service/SimulacionServiceTest.java
 ```
 
 Cada paquete tiene un `package-info.java` con su propósito, para que Git conserve la carpeta.

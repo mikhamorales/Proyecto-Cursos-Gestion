@@ -21,6 +21,14 @@ Credenciales: admin / test      -> en los curl: -u admin:test
 Si el motor no responde:
     docker compose up -d
 
+Ojo: el BPMN usa listeners Java (flowable.listeners.*). El JAR esta en
+proyecto/shared/lib/proyecto-0.0.1-SNAPSHOT.jar y el compose lo monta en
+/app/WEB-INF/lib/. Si se recrea el contenedor sin ese mount, enviar una
+solicitud desde la web-app da HTTP 500 y en los logs aparece
+"ClassNotFoundException: flowable.listeners.ContarActivas".
+Para reconstruir solo Flowable en este entorno:
+    docker compose -p joaqu up -d --no-deps --force-recreate flowable-ui
+
 Los comandos van en una sola linea: se pegan tal cual en PowerShell o
 en bash (curl.exe evita el alias Invoke-WebRequest de Windows). jq es
 opcional, solo ordena la salida.
@@ -105,30 +113,68 @@ curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":
 
 Es un "trigger", no un messageEventReceived: por eso no lleva messageName.
 
----------------------------------------------------------------------
-4) EJEMPLO REAL (instancia 6cc621f0-e2e8-11f1-bd99-ea2b43ae71d3)
----------------------------------------------------------------------
+Version automatica (busca el executionId y lo dispara, sin copiar IDs):
 
-Son IDs de ejemplo: si tu instancia es otra, buscalos con el paso 1.
+INST=<ID_INSTANCIA>; curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/runtime/executions?processInstanceId=$INST" | jq -r '.data[] | select(.activityId=="sid-982375C3-4EF8-435A-A291-BF9A1933A05C") | .id' | xargs -I{} curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"trigger","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/{}"
 
-Recibir nomina (execution e40a3418-e2e8-11f1-bd99-ea2b43ae71d3):
-
-curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"trigger","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/e40a3418-e2e8-11f1-bd99-ea2b43ae71d3"
-
-Cancelacion (execution e40a3416-e2e8-11f1-bd99-ea2b43ae71d3):
-
-curl.exe -X PUT -u admin:test -H 'Content-Type: application/json' -d '{"action":"messageEventReceived","messageName":"Cancelacion","variables":[]}' "http://localhost:8080/flowable-ui/process-api/runtime/executions/e40a3416-e2e8-11f1-bd99-ea2b43ae71d3"
-
-Esta instancia ya consumo Aprobacion, por eso su unica suscripcion de
-mensaje es "Cancelacion" (mas la global "Solicitud de curso").
-
-OJO: esa instancia pertenece a process:2 (modelo viejo, sin el fix de
-compensacion), asi que las tareas de recursos siguen fallando ahi.
-El modelo corregido ya esta desplegado como process:3. Para probar
-"Evaluar recursos" y sus ramas, crear una solicitud NUEVA.
+Ojo: hay que reemplazar <ID_INSTANCIA> por un id real. Si se deja el
+texto "<ID_INSTANCIA>" tal cual, Flowable no devuelve JSON y jq falla con
+"parse error: Invalid numeric literal".
 
 ---------------------------------------------------------------------
-5) SI ALGO FALLA
+4) DESPLEGAR EL MODELO ACTUAL (compatible con el Modeler)
+---------------------------------------------------------------------
+
+El modelo del repo YA NO USA compensacion BPMN. Las tareas "Liberar aula",
+"Liberar aula virtual" y "Liberar equipamiento" son tareas normales,
+visibles y conectadas por sequenceFlow al evento de Cancelacion. El XML
+ya fue probado con Import Process en el Flowable Modeler: abre el editor
+sin el error "error message null" y muestra las 3 tareas de liberacion.
+Ademas, esas 3 tareas estan declaradas en <flowNodeRef> de la lane
+"Administracion"; sin eso el import del Modeler fallaba con NPE.
+
+Desplegar el archivo del repo con la API (en WSL bash):
+
+curl.exe -X POST -u admin:test -F "file=@/mnt/c/Users/joaqu/eclipse-workspace/proyecto-bpmn/Proyecto-Cursos-Gestion/proyecto/shared/src/resources/Institucion_de_capacitacion.bpmn20.xml" "http://localhost:8080/flowable-ui/process-api/repository/deployments"
+
+Verificar que la ultima version NO tiene compensacion (debe dar 0):
+
+curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/repository/process-definitions?key=process" | jq -r '.data | max_by(.version) | .id' | xargs -I{} curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/repository/process-definitions/{}/resourcedata" | grep -Ec 'association|compensateEventDefinition'
+
+Ver que la ultima version es la que se usa:
+
+curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/repository/process-definitions?key=process" | jq -r '.data | max_by(.version) | [.version,.id] | @tsv'
+
+En este entorno la version buena es process:10. Las instancias nuevas
+siempre usan la ultima version; las viejas (process:1 a process:9)
+quedan con su modelo original y no se pueden migrar. Para probar, crear
+una solicitud NUEVA.
+
+process:10 corrige ademas la asignacion de "Desarrollar curso": el XML
+usa flowable:assignee="${docenteSeleccionado}" SIN comillas. Antes tenia
+"${docenteSeleccionado}" y el assignee quedaba como "docente1" (con
+comillas), por eso al docente nunca le aparecia la tarea en "Mis tareas".
+Ojo: entre "Definir docente" y "Desarrollar curso" hay un timer PT2M;
+la tarea aparece recien cuando vencen los 2 minutos.
+
+---------------------------------------------------------------------
+5) CANCELACION EN EL MODELO NUEVO
+---------------------------------------------------------------------
+
+Al enviar "Cancelacion" mientras la instancia esta en "Preparar curso":
+
+  - se interrumpe "Preparar curso";
+  - corren "Liberar aula" y "Liberar aula virtual" (servicio, automaticas);
+  - aparece la tarea "Liberar equipamiento" para el grupo administracion:
+    hay que reclamarla y completarla desde la UI de Flowable;
+  - luego "Notificar cierre" y el proceso termina con resultado=CANCELADO.
+
+Para verificar el resultado:
+
+curl.exe -s -u admin:test "http://localhost:8080/flowable-ui/process-api/history/historic-variable-instances?processInstanceId=<ID_INSTANCIA>&variableName=resultado"
+
+---------------------------------------------------------------------
+6) SI ALGO FALLA
 ---------------------------------------------------------------------
 
 - "does not have a subscription to a message event with name X":
@@ -145,5 +191,13 @@ El modelo corregido ya esta desplegado como process:3. Para probar
 - "Request method 'POST' not supported": usar -X PUT, no -X POST.
 
 - 401: revisar admin/test.
+- "Parent activity for boundary compensation event could not be found":
+  la instancia usa un modelo viejo (process:1 a process:7). Crear una
+  solicitud NUEVA: las instancias no se pueden migrar de definicion.
+
+- "Import failed ... error message null" al importar en el Modeler:
+  el XML del repo ya trae las tareas de liberacion dentro de la lane
+  "Administracion". Si se edita a mano, revisar los <flowNodeRef>.
+
 - 500: ver logs con "docker compose logs -f flowable-ui".
 - No conecta: "docker compose ps".
