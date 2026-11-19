@@ -98,6 +98,25 @@ public class LoginController {
         return "redirect:/empleados";
     }
 
+    @PostMapping("/empleados/recibir-nomina")
+    public String recibirNomina(@RequestParam String processInstanceId,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        Object usuario = session.getAttribute("usuario");
+        if (usuario == null || !adminUsername.equals(usuario)) {
+            return "redirect:/";
+        }
+        try {
+            simulacionService.recibirNomina(processInstanceId);
+            redirectAttributes.addFlashAttribute("successMessage", "Senal enviada: Recibir nomina");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (FlowableRestClient.FlowableUnavailableException e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "No se pudo enviar la senal: " + e.getMessage());
+        }
+        return "redirect:/empleados";
+    }
+
     @PostMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();

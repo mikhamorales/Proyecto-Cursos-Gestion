@@ -1,6 +1,8 @@
 package com.proyecto.web.client;
 
 import com.proyecto.web.model.EventSubscription;
+import com.proyecto.web.model.Execution;
+import com.proyecto.web.model.ExecutionActionRequest;
 import com.proyecto.web.model.FlowableListResponse;
 import com.proyecto.web.model.MessageEventRequest;
 import com.proyecto.web.model.ProcessVariable;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.util.UriBuilder;
 
 import java.util.List;
 
@@ -123,6 +126,39 @@ public class FlowableRestClient {
     }
 
     /**
+     * Lista las ejecuciones activas, opcionalmente filtradas por instancia y actividad.
+     */
+    public List<Execution> listExecutions(String processInstanceId, String activityId) {
+        try {
+            FlowableListResponse<Execution> response = processClient.get()
+                    .uri(uriBuilder -> {
+                        UriBuilder builder = uriBuilder.path("/runtime/executions");
+                        if (processInstanceId != null) {
+                            builder.queryParam("processInstanceId", processInstanceId);
+                        }
+                        if (activityId != null) {
+                            builder.queryParam("activityId", activityId);
+                        }
+                        return builder.build();
+                    })
+                    .headers(headers -> headers.setBasicAuth(username, password))
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<FlowableListResponse<Execution>>() {
+                    });
+            if (response == null || response.data() == null) {
+                return List.of();
+            }
+            return response.data();
+        } catch (RestClientResponseException e) {
+            throw new FlowableUnavailableException(
+                    "Flowable rechazo la consulta de ejecuciones (HTTP "
+                            + e.getStatusCode().value() + ").", e);
+        } catch (ResourceAccessException e) {
+            throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
+        }
+    }
+
+    /**
      * Devuelve las variables de una instancia de proceso.
      */
     public List<ProcessVariable> getProcessInstanceVariables(String processInstanceId) {
@@ -157,6 +193,26 @@ public class FlowableRestClient {
         } catch (RestClientResponseException e) {
             throw new FlowableUnavailableException(
                     "Flowable rechazo el mensaje (HTTP " + e.getStatusCode().value() + ").", e);
+        } catch (ResourceAccessException e) {
+            throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
+        }
+    }
+
+    /**
+     * Envia una senal a una ejecucion para continuar una tarea de recepcion.
+     */
+    public void signalExecution(String executionId) {
+        try {
+            processClient.put()
+                    .uri("/runtime/executions/{id}", executionId)
+                    .headers(headers -> headers.setBasicAuth(username, password))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(new ExecutionActionRequest("signal"))
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (RestClientResponseException e) {
+            throw new FlowableUnavailableException(
+                    "Flowable rechazo la senal (HTTP " + e.getStatusCode().value() + ").", e);
         } catch (ResourceAccessException e) {
             throw new FlowableUnavailableException("No se pudo conectar con Flowable.", e);
         }

@@ -19,14 +19,14 @@
     <section class="panel" th:if="${esAdmin}">
         <h1>Simulacion de mensajes</h1>
         <p>
-            Instancias del proceso que estan esperando un mensaje. Los botones simulan
-            la recepcion del evento correspondiente.
+            Instancias del proceso que estan esperando un mensaje o una tarea de recepcion.
+            Los botones simulan la recepcion del evento o la senal de continuacion correspondiente.
         </p>
 
         <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
-        <p th:if="${#lists.isEmpty(instancias)}">No hay instancias esperando mensajes.</p>
+        <p th:if="${#lists.isEmpty(instancias)}">No hay instancias esperando mensajes ni tareas de recepcion.</p>
 
         <table class="tabla-simulacion" th:unless="${#lists.isEmpty(instancias)}">
             <thead>
@@ -51,6 +51,11 @@
                             <button type="submit"
                                     th:text="${accion.etiqueta}"
                                     th:classappend="${accion.peligro} ? 'btn-simulacion-peligro' : 'btn-simulacion'"></button>
+                        </form>
+                        <form th:if="${inst.esperandoNomina}"
+                              th:action="@{/empleados/recibir-nomina}" method="post">
+                            <input type="hidden" name="processInstanceId" th:value="${inst.processInstanceId}">
+                            <button type="submit" class="btn-simulacion">Recibir nomina</button>
                         </form>
                     </div>
                 </td>

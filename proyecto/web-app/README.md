@@ -159,7 +159,7 @@ La sesión guarda `usuario` y `password` para autenticar las próximas llamadas 
 
 ### Panel de simulación de mensajes (solo admin)
 
-Si el usuario logueado coincide con `flowable.admin.username` (por defecto `admin`), `/empleados` muestra además una tabla con las instancias del proceso que están esperando un mensaje. Cada fila agrupa las suscripciones por `processInstanceId` y muestra un botón por mensaje disponible:
+Si el usuario logueado coincide con `flowable.admin.username` (por defecto `admin`), `/empleados` muestra además una tabla con las instancias del proceso que están esperando un mensaje o una tarea de recepción. Cada fila agrupa las suscripciones por `processInstanceId` y muestra un botón por mensaje disponible:
 
 | Mensaje | Botón | Efecto |
 |---|---|---|
@@ -172,7 +172,31 @@ El envío hace `PUT /runtime/executions/{executionId}` con `{"action":"messageEv
 
 > El panel necesita que el BPMN (con los `messageEventDefinition`) y el DMN `viabilidad` estén desplegados en el motor. Los archivos viven en `proyecto/shared/src/resources/` y se despliegan a mano; no se empaquetan en el jar de `shared`.
 >
-> La tabla muestra las etiquetas del panel; el `messageName` enviado es siempre el `eventName` real que devuelve Flowable (`Aprobacion`, `Rechazo`, `Modificacion`, `Cancelacion`). Los comandos `curl` equivalentes están en `comandos-mensajes-empresa.txt` (raíz del repo), incluido el disparo de **"Recibir nomina"**, que es una `receiveTask` y se dispara con `{"action":"trigger"}`, no con un mensaje.
+> La tabla muestra las etiquetas del panel; el `messageName` enviado es siempre el `eventName` real que devuelve Flowable (`Aprobacion`, `Rechazo`, `Modificacion`, `Cancelacion`). Los comandos `curl` equivalentes están en `comandos-mensajes-empresa.txt` (raíz del repo).
+
+#### Botón "Recibir nómina" (issue7)
+
+"Recibir nomina" es una **receive task**, no un evento de mensaje: no genera suscripción ni aparece en `/runtime/tasks`. El panel la detecta con `GET /runtime/executions?activityId=sid-982375C3-4EF8-435A-A291-BF9A1933A05C` (sin filtrar por instancia) y marca esas filas con un botón adicional **Recibir nomina**. Si una instancia está esperando solo en esa tarea y no tiene ninguna suscripción de mensaje, igual aparece en la tabla.
+
+| Elemento | Valor |
+|---|---|
+| `activityId` | `sid-982375C3-4EF8-435A-A291-BF9A1933A05C` |
+| Endpoint de la app | `POST /empleados/recibir-nomina` con `processInstanceId` |
+| Servicio | `SimulacionService.recibirNomina(processInstanceId)` |
+| Consulta | `FlowableRestClient.listExecutions(processInstanceId, activityId)` |
+| Señal | `FlowableRestClient.signalExecution(executionId)` → `PUT /runtime/executions/{executionId}` con `{"action":"signal"}` |
+
+El botón actúa sobre **una instancia seleccionada**, igual que los botones de mensaje: no dispara todas las instancias detenidas en la tarea. El `processInstanceId` viaja en un campo oculto del formulario y el servicio resuelve la ejecución hija dentro del subproceso "Preparar curso", que comparte ese id. Si hay más de una ejecución candidata, se elige la de menor `id` y se registra un `warn`.
+
+En Flowable 6.8, `signal` y `trigger` son alias: `ExecutionResource.performExecutionAction` envía ambos a `runtimeService.trigger(executionId)`. Por eso el botón usa `signal` y los comandos `curl` históricos con `trigger` siguen siendo válidos.
+
+Feedback (mismo estilo de mensajes flash que los botones existentes):
+
+| Situación | Mensaje |
+|---|---|
+| Éxito | `Senal enviada: Recibir nomina` |
+| Instancia inexistente o que ya avanzó | `La instancia no existe o ya no esta esperando en 'Recibir nomina'.` |
+| Flowable caído / HTTP de error | `No se pudo enviar la senal: <detalle>` |
 
 ### Pantallas de administración (`/administrativos`)
 
@@ -257,7 +281,7 @@ Después se corrigió además un fallo específico del importador del Modeler (`
 
 Hay dos niveles de pruebas:
 
-**Unitarias** (no necesitan Docker): `mvn test -q` en `web-app`, `docente-app` y `shared`. Incluyen `SimulacionServiceTest`, que verifica que los botones del panel usen los nombres reales de los mensajes (`Aprobacion`, `Rechazo`, `Modificacion`, `Cancelacion`) y marquen como peligrosos solo `Rechazo` y `Cancelacion`, y `HomeControllerVistaTest`, que comprueba que la plantilla de `docente-app` renderice sin errores.
+**Unitarias** (no necesitan Docker): `mvn test -q` en `web-app`, `docente-app` y `shared`. Incluyen `SimulacionServiceTest`, que verifica que los botones del panel usen los nombres reales de los mensajes (`Aprobacion`, `Rechazo`, `Modificacion`, `Cancelacion`) y marquen como peligrosos solo `Rechazo` y `Cancelacion`; también comprueba que se marque la espera en "Recibir nomina", que se señalice la ejecución correcta y que no se señale nada cuando la instancia no está en esa tarea. `HomeControllerVistaTest` comprueba que la plantilla de `docente-app` renderice sin errores.
 
 **End-to-end** (necesitan Docker con `flowable-ui` y `flowable-postgres` arriba, el proceso `process` desplegado y el JAR de listeners montado). Desde la raíz del repo:
 
@@ -298,7 +322,8 @@ web-app/
     │   │   ├── service/           # SolicitudService, AuthService, SimulacionService, RolService, TareaService, DocenteService
     │   │   ├── client/            # FlowableRestClient
     │   │   ├── model/             # SolicitudForm, VariableRequest, StartProcessRequest,
-    │   │   │                      # EventSubscription, ProcessVariable, MessageEventRequest,
+    │   │   │                      # EventSubscription, Execution, ExecutionActionRequest,
+    │   │   │                      # ProcessVariable, MessageEventRequest,
     │   │   │                      # AccionSimulable, InstanciaSimulable, FlowableListResponse,
     │   │   │                      # Tarea, TareaVista, RecursosForm, TaskActionRequest,
     │   │   │                      # DefinirDocenteForm, TareaDocenteVista
