@@ -49,6 +49,43 @@ def consultar_todos(session, recurso, filtros):
             break
 
 
+def consultar_resultado(session, instancia_id):
+    """Obtiene la variable 'resultado' de una instancia histórica."""
+    valor = ""
+    for variable in consultar_todos(
+        session,
+        "history/historic-variable-instances",
+        {
+            "processInstanceId": instancia_id,
+            "variableName": "resultado",
+        },
+    ):
+        dato = variable.get("variable") or variable
+        valor_variable = dato.get("value") if isinstance(dato, dict) else None
+        if valor_variable is not None:
+            valor = str(valor_variable)
+    return valor
+
+
+def motivo_fin_actividad(session, actividad):
+    tarea_id = actividad.get("taskId")
+    if not tarea_id:
+        return ""
+
+    try:
+        respuesta = session.get(
+            f"{BASE_URL}/history/historic-task-instances/{tarea_id}",
+            timeout=30,
+        )
+        respuesta.raise_for_status()
+        motivo = respuesta.json().get("deleteReason")
+    except (requests.RequestException, ValueError):
+        # No vacío: analizar.py excluye la tarea en vez de contarla como completada.
+        return "ERROR"
+
+    return str(motivo) if motivo is not None else ""
+
+
 def fecha_iso(valor):
     return datetime.fromisoformat(valor.replace("Z", "+00:00"))
 
@@ -76,6 +113,8 @@ def main():
             if instancia.get("deleteReason"):
                 continue
 
+            resultado = consultar_resultado(session, instancia["id"])
+
             actividades = consultar_todos(
                 session,
                 "history/historic-activity-instances",
@@ -93,8 +132,13 @@ def main():
                 ):
                     continue
 
+                motivo_fin = motivo_fin_actividad(session, actividad)
                 eventos.append({
                     "instancia": instancia["id"],
+                    "resultado": resultado,
+                    "actividad_fin": (
+                        instancia.get("endActivityId") or ""
+                    ),
                     "definicion": actividad["processDefinitionId"],
                     "evento_id": actividad["id"],
                     "actividad_id": actividad["activityId"],
@@ -106,6 +150,7 @@ def main():
                     "inicio": actividad["startTime"],
                     "fecha_hora": actividad["endTime"],
                     "recurso": actividad.get("assignee") or "",
+                    "motivo_fin": motivo_fin,
                 })
 
     # Ordenar por instancia y fecha de finalizaciÃ³n.
@@ -123,6 +168,7 @@ def main():
         "instancia", "definicion", "evento_id",
         "actividad_id", "actividad", "tipo",
         "inicio", "fecha_hora", "recurso",
+        "actividad_fin", "resultado", "motivo_fin",
     ]
 
     with open(
