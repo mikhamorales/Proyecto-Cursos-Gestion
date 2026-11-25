@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Analisis de ejecuciones - Gestion de Cursos</title>
+	<link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+	<header class="barra">
+		<div>
+			<h1>Analisis de ejecuciones del proceso</h1>
+			<p class="bajada">Datos historicos de Flowable. Solo lectura.</p>
+		</div>
+		<a class="accion" th:href="@{/}">Actualizar</a>
+	</header>
+
+	<main>
+		<div class="alerta error" th:if="${error}" th:text="${error}"></div>
+
+		<section>
+			<h2>1. Resultados de las solicitudes</h2>
+			<p class="detalle" th:text="'Total de instancias terminadas: ' + ${resumen.totalInstancias}">
+				Total de instancias terminadas: 0
+			</p>
+			<p class="vacio" th:if="${resumen.totalInstancias == 0}">
+				No hay instancias terminadas para mostrar.
+			</p>
+			<table th:unless="${resumen.totalInstancias == 0}">
+				<thead>
+					<tr>
+						<th>Resultado</th>
+						<th class="numero">Cantidad</th>
+						<th class="numero">Porcentaje</th>
+						<th class="grafico">Distribucion</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="fila : ${resumen.resultados}"
+						th:classappend="${fila.total} ? 'fila-total'">
+						<td th:text="${fila.etiqueta}">Curso finalizado</td>
+						<td class="numero" th:text="${fila.cantidad}">0</td>
+						<td class="numero" th:text="${fila.porcentajeTexto}">0,0 %</td>
+						<td class="grafico">
+							<div class="barra">
+								<div class="relleno" th:classappend="${fila.total} ? 'relleno-total'"
+									th:style="'width: ' + ${fila.ancho} + '%'"></div>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>2. Analisis de la preparacion paralela</h2>
+			<p class="detalle" th:text="'Preparaciones completadas normalmente: ' + ${resumen.instanciasPreparacion}">
+				Preparaciones completadas normalmente: 0
+			</p>
+			<p class="vacio" th:if="${resumen.instanciasPreparacion == 0}">
+				No hay preparaciones completas para medir.
+			</p>
+			<table th:unless="${resumen.instanciasPreparacion == 0}">
+				<thead>
+					<tr>
+						<th>Rama</th>
+						<th class="numero">Casos</th>
+						<th class="numero">Duracion promedio</th>
+						<th class="grafico">Comparacion</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="rama : ${resumen.ramas}">
+						<td th:text="${rama.nombre}">Inscripciones</td>
+						<td class="numero" th:text="${rama.casos}">0</td>
+						<td class="numero" th:text="${rama.promedioTexto}">0 min</td>
+						<td class="grafico">
+							<div class="barra">
+								<div class="relleno relleno-azul"
+									th:style="'width: ' + ${rama.ancho} + '%'"></div>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<p class="nota">La rama de recursos termina cuando finalizan todas las acciones seleccionadas.</p>
+		</section>
+
+		<section>
+			<h2>3. Distribucion de tareas completadas</h2>
+			<p class="detalle" th:text="'Tareas de usuario completadas: ' + ${resumen.totalTareas}">
+				Tareas de usuario completadas: 0
+			</p>
+			<p class="vacio" th:if="${resumen.totalTareas == 0}">
+				No hay tareas de usuario completadas para mostrar.
+			</p>
+			<table th:unless="${resumen.totalTareas == 0}">
+				<thead>
+					<tr>
+						<th>Rol</th>
+						<th>Usuario</th>
+						<th class="numero">Tareas completadas</th>
+						<th class="grafico">Comparacion</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="fila : ${resumen.distribucion}"
+						th:classappend="${fila.total} ? 'fila-total'">
+						<td th:text="${fila.rol}">Administrativo</td>
+						<td th:text="${fila.usuario}">admin1</td>
+						<td class="numero" th:text="${fila.cantidad}">0</td>
+						<td class="grafico">
+							<div class="barra">
+								<div class="relleno relleno-verde" th:classappend="${fila.total} ? 'relleno-total'"
+									th:style="'width: ' + ${fila.ancho} + '%'"></div>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<p class="nota">Se excluyen tareas pendientes e interrumpidas por cancelacion.</p>
+		</section>
+	</main>
+</body>
+</html>
