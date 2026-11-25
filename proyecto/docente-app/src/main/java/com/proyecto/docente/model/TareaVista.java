@@ -1,18 +1,18 @@
 package com.proyecto.docente.model;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import org.flowable.task.api.Task;
 
 import com.proyecto.docente.service.TareaService;
 
 /**
- * Vista de una tarea para Thymeleaf. Evita exponer el objeto Task de Flowable
- * y formatea la fecha en el servidor. Los datos del curso (empresa y tematica)
- * se leen de las variables de la instancia en TareaService.
+ * Vista de una tarea para Thymeleaf. Evita exponer el JSON de Flowable y
+ * formatea la fecha en el servidor. Los datos del curso (empresa y tematica)
+ * se leen de las variables de proceso que devuelve la API REST.
  */
 public class TareaVista {
 
@@ -40,15 +40,47 @@ public class TareaVista {
 		this.taskDefinitionKey = taskDefinitionKey;
 	}
 
-	public static TareaVista desde(Task tarea, Map<String, Object> variables) {
-		return new TareaVista(tarea.getId(), tarea.getName(), tarea.getAssignee(),
-				formatear(tarea.getCreateTime()), tarea.getProcessInstanceId(),
-				texto(variables.get("empresa")), texto(variables.get("tematica")),
-				tarea.getTaskDefinitionKey());
+	/** Convierte una tarea devuelta por GET /runtime/tasks. */
+	public static TareaVista desde(Map<String, Object> tarea) {
+		Map<String, Object> variables = variablesDe(tarea);
+		return new TareaVista(
+				texto(tarea.get("id")),
+				texto(tarea.get("name")),
+				texto(tarea.get("assignee")),
+				formatear(tarea.get("createTime")),
+				texto(tarea.get("processInstanceId")),
+				texto(variables.get("empresa")),
+				texto(variables.get("tematica")),
+				texto(tarea.get("taskDefinitionKey")));
 	}
 
-	private static String formatear(Date fecha) {
-		return fecha == null ? "" : FORMATO.format(fecha.toInstant());
+	private static Map<String, Object> variablesDe(Map<String, Object> tarea) {
+		Object valores = tarea.get("variables");
+		if (!(valores instanceof List<?> lista)) {
+			return Map.of();
+		}
+		Map<String, Object> resultado = new HashMap<>();
+		for (Object item : lista) {
+			if (item instanceof Map<?, ?> variable) {
+				Object nombre = variable.get("name");
+				if (nombre != null) {
+					resultado.put(nombre.toString(), variable.get("value"));
+				}
+			}
+		}
+		return resultado;
+	}
+
+	private static String formatear(Object fecha) {
+		if (fecha == null) {
+			return "";
+		}
+		try {
+			return FORMATO.format(Instant.parse(fecha.toString()));
+		}
+		catch (Exception ignorado) {
+			return fecha.toString();
+		}
 	}
 
 	private static String texto(Object valor) {

@@ -1,2 +1,2 @@
 org.springframework.boot.diagnostics.FailureAnalyzer=\
-com.proyecto.docente.config.ConexionBaseDeDatosFailureAnalyzer
+com.proyecto.docente.config.FlowableRestFailureAnalyzer

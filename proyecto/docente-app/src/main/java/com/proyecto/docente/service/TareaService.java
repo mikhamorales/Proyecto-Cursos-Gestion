@@ -1,23 +1,19 @@
 package com.proyecto.docente.service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.flowable.common.engine.api.FlowableException;
-import org.flowable.common.engine.api.FlowableTaskAlreadyClaimedException;
-import org.flowable.engine.RuntimeService;
-import org.flowable.engine.TaskService;
-import org.flowable.task.api.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.proyecto.docente.client.FlowableRestClient;
+import com.proyecto.docente.client.FlowableRestException;
 import com.proyecto.docente.model.TareaVista;
 
 /**
- * Operaciones sobre las tres tareas del carril docente del proceso de cursos.
- * Usa la API Java de Flowable embebida, igual que admin-app.
+ * Operaciones sobre las tres tareas del carril docente del proceso.
+ * Usa la API REST de Flowable, igual que las demas apps del proyecto.
  */
 @Service
 public class TareaService {
@@ -35,69 +31,50 @@ public class TareaService {
 
 	private static final Logger log = LoggerFactory.getLogger(TareaService.class);
 
-	private final TaskService taskService;
-	private final RuntimeService runtimeService;
+	private final FlowableRestClient cliente;
 
-	public TareaService(TaskService taskService, RuntimeService runtimeService) {
-		this.taskService = taskService;
-		this.runtimeService = runtimeService;
+	public TareaService(FlowableRestClient cliente) {
+		this.cliente = cliente;
 	}
 
-	/** Tareas de las tres claves ya reclamadas por el usuario (o asignadas directamente). */
+	/** Tareas de las tres claves ya reclamadas por el usuario. */
 	public List<TareaVista> tareasAsignadas(String usuario) {
-		return mapear(taskService.createTaskQuery()
-				.taskAssignee(usuario)
-				.taskDefinitionKeys(CLAVES_DOCENTE)
-				.orderByTaskCreateTime().desc()
-				.list());
+		return mapear(cliente.tareas(builder -> builder.queryParam("assignee", usuario)));
 	}
 
-	/**
-	 * Tareas sin asignar cuyo candidato es el usuario o el grupo 'docentes'.
-	 * 'Elaborar informe' usa candidateUsers, las demas usan candidateGroups
-	 * segun el BPMN, por eso se contemplan ambos casos.
-	 */
+	/** Tareas sin asignar que el usuario puede reclamar por usuario o grupo. */
 	public List<TareaVista> tareasReclamables(String usuario) {
-		return mapear(taskService.createTaskQuery()
-				.taskUnassigned()
-				.taskDefinitionKeys(CLAVES_DOCENTE)
-				.or()
-					.taskCandidateUser(usuario)
-					.taskCandidateGroup(AutenticacionService.GRUPO_DOCENTES)
-				.endOr()
-				.orderByTaskCreateTime().desc()
-				.list());
+		return mapear(cliente.tareas(builder -> {
+			builder.queryParam("unassigned", "true");
+			builder.queryParam("candidateUser", usuario);
+		}));
 	}
 
 	/** Devuelve una tarea del carril docente ya preparada para la vista. */
 	public TareaVista obtenerTarea(String tareaId) {
-		return mapear(List.of(buscarTarea(tareaId))).get(0);
+		return TareaVista.desde(buscarTarea(tareaId));
 	}
 
 	/**
 	 * Reclama la tarea para el usuario. La validacion previa es necesaria porque
-	 * TaskService.claim() no controla los candidatos.
+	 * el REST de Flowable no controla los candidatos al hacer claim.
 	 */
 	public void reclamar(String tareaId, String usuario) {
-		Task tarea = buscarTarea(tareaId);
-		if (tarea.getAssignee() != null) {
-			throw new TareaException("La tarea ya fue reclamada por '" + tarea.getAssignee() + "'.");
+		Map<String, Object> tarea = buscarTarea(tareaId);
+		if (tarea.get("assignee") != null) {
+			throw new TareaException("La tarea ya fue reclamada por '" + tarea.get("assignee") + "'.");
 		}
-		long habilitado = taskService.createTaskQuery()
-				.taskId(tareaId)
-				.taskUnassigned()
-				.or()
-					.taskCandidateUser(usuario)
-					.taskCandidateGroup(AutenticacionService.GRUPO_DOCENTES)
-				.endOr()
-				.count();
-		if (habilitado == 0) {
+		boolean habilitado = cliente.tareas(builder -> {
+			builder.queryParam("unassigned", "true");
+			builder.queryParam("candidateUser", usuario);
+		}).stream().anyMatch(tareaCandidata -> tareaId.equals(tareaCandidata.get("id")));
+		if (!habilitado) {
 			throw new TareaException("No tenes permiso para reclamar esta tarea.");
 		}
 		try {
-			taskService.claim(tareaId, usuario);
+			cliente.reclamar(tareaId, usuario);
 		}
-		catch (FlowableTaskAlreadyClaimedException ex) {
+		catch (FlowableRestException ex) {
 			throw new TareaException("Otro docente reclamo la tarea primero.");
 		}
 	}
@@ -113,42 +90,35 @@ public class TareaService {
 	 * (informe).
 	 */
 	public void completar(String tareaId, String usuario, Map<String, Object> variables) {
-		Task tarea = buscarTarea(tareaId);
-		if (!usuario.equals(tarea.getAssignee())) {
+		Map<String, Object> tarea = buscarTarea(tareaId);
+		if (!usuario.equals(tarea.get("assignee"))) {
 			throw new TareaException("Solo podes completar una tarea reclamada por vos.");
 		}
 		try {
-			taskService.complete(tareaId, variables == null ? Map.of() : variables);
+			cliente.completar(tareaId, variables == null ? Map.of() : variables);
 		}
-		catch (FlowableException ex) {
+		catch (FlowableRestException ex) {
 			log.error("Fallo al completar la tarea {}", tareaId, ex);
 			throw new TareaException("No se pudo completar la tarea. Revisa el log de la aplicacion.");
 		}
 	}
 
-	private Task buscarTarea(String tareaId) {
-		Task tarea = taskService.createTaskQuery().taskId(tareaId).singleResult();
+	private Map<String, Object> buscarTarea(String tareaId) {
+		Map<String, Object> tarea = cliente.tarea(tareaId);
 		if (tarea == null) {
 			throw new TareaException("La tarea no existe o ya fue completada.");
 		}
-		if (!CLAVES_DOCENTE.contains(tarea.getTaskDefinitionKey())) {
+		if (!CLAVES_DOCENTE.contains(tarea.get("taskDefinitionKey"))) {
 			throw new TareaException("La tarea no corresponde al equipo docente.");
 		}
 		return tarea;
 	}
 
-	private List<TareaVista> mapear(List<Task> tareas) {
-		Map<String, Map<String, Object>> cacheVariables = new HashMap<>();
+	private List<TareaVista> mapear(List<Map<String, Object>> tareas) {
 		return tareas.stream()
-				.map(tarea -> TareaVista.desde(tarea, variablesDe(tarea.getProcessInstanceId(), cacheVariables)))
+				.filter(tarea -> CLAVES_DOCENTE.contains(tarea.get("taskDefinitionKey")))
+				.map(TareaVista::desde)
 				.toList();
-	}
-
-	private Map<String, Object> variablesDe(String processInstanceId, Map<String, Map<String, Object>> cache) {
-		if (processInstanceId == null) {
-			return Map.of();
-		}
-		return cache.computeIfAbsent(processInstanceId, runtimeService::getVariables);
 	}
 
 }
